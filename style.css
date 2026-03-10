@@ -1,0 +1,336 @@
+body {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(#081a45, #0b1a3a);
+  color: white;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 12px;
+}
+
+#startScreen,
+#questionBox,
+#levelBox {
+  width: 700px;
+  margin: 0 auto 18px auto;
+  background: linear-gradient(180deg, #1d3c78, #132a57);
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+#startScreen h2,
+#questionBox h2,
+#levelBox h2 {
+  margin-top: 0;
+}
+
+#startButton,
+.answerBtn,
+#pauseButton,
+#nextLevelButton {
+  font-size: 22px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  margin: 8px;
+}
+
+#answerButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#gameArea {
+  width: 700px;
+  height: 460px;
+  margin: auto;
+  background: linear-gradient(#1a3165, #132a57);
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  touch-action: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+#moon {
+  position: absolute;
+  top: 40px;
+  right: 60px;
+  width: 70px;
+  height: 70px;
+  background: #f4e8b0;
+  border-radius: 50%;
+  box-shadow: 0 0 25px rgba(255, 244, 180, 0.5);
+}
+
+.tree {
+  position: absolute;
+  bottom: 75px;
+  width: 70px;
+  height: 150px;
+}
+
+.tree::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 28px;
+  width: 14px;
+  height: 55px;
+  background: #4e2f20;
+  border-radius: 5px;
+}
+
+.tree::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70px;
+  height: 95px;
+  background: #183d2c;
+  border-radius: 50% 50% 45% 45%;
+}
+
+.tree1 { left: 40px; }
+.tree2 { left: 130px; }
+.tree3 { right: 35px; }
+
+#ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 78px;
+  background: #294a2b;
+}
+
+#bear {
+  position: absolute;
+  bottom: 40px;
+  left: 290px;
+  width: 130px;
+  height: 170px;
+  transform-origin: center bottom;
+}
+
+#bear.running {
+  animation: bounce 0.28s infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0) scale(var(--bearScale, 1)); }
+  to { transform: translateY(-4px) scale(var(--bearScale, 1)); }
+}
+
+#bearHead {
+  position: absolute;
+  top: 0;
+  left: 34px;
+  width: 62px;
+  height: 62px;
+  background: #8b5a3c;
+  border-radius: 50%;
+  z-index: 3;
+}
+
+.ear {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: #8b5a3c;
+  border-radius: 50%;
+  top: -6px;
+}
+
+.left-ear { left: 4px; }
+.right-ear { right: 4px; }
+
+.eye {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #222;
+  border-radius: 50%;
+  top: 23px;
+}
+
+.left-eye { left: 18px; }
+.right-eye { right: 18px; }
+
+#snout {
+  position: absolute;
+  width: 24px;
+  height: 18px;
+  background: #d9b38c;
+  border-radius: 50%;
+  left: 19px;
+  top: 33px;
+}
+
+#nose {
+  position: absolute;
+  width: 8px;
+  height: 6px;
+  background: #222;
+  border-radius: 50%;
+  left: 8px;
+  top: 3px;
+}
+
+#bearNeck {
+  position: absolute;
+  top: 52px;
+  left: 52px;
+  width: 26px;
+  height: 20px;
+  background: #8b5a3c;
+  border-radius: 10px;
+  z-index: 2;
+}
+
+#bearBody {
+  position: absolute;
+  top: 58px;
+  left: 22px;
+  width: 86px;
+  height: 92px;
+  background: #96623f;
+  border-radius: 40px 40px 30px 30px;
+  z-index: 1;
+}
+
+.arm {
+  position: absolute;
+  width: 18px;
+  height: 44px;
+  background: #96623f;
+  top: 18px;
+  border-radius: 14px;
+  transform-origin: top center;
+}
+
+.left-arm {
+  left: -8px;
+  transform: rotate(16deg);
+}
+
+.right-arm {
+  right: -8px;
+  transform: rotate(-16deg);
+}
+
+#bear.running .left-arm {
+  animation: swingLeft 0.28s infinite alternate;
+}
+
+#bear.running .right-arm {
+  animation: swingRight 0.28s infinite alternate;
+}
+
+@keyframes swingLeft {
+  from { transform: rotate(28deg); }
+  to { transform: rotate(-2deg); }
+}
+
+@keyframes swingRight {
+  from { transform: rotate(-28deg); }
+  to { transform: rotate(2deg); }
+}
+
+.leg {
+  position: absolute;
+  width: 22px;
+  height: 34px;
+  bottom: -18px;
+  background: #8b5a3c;
+  border-radius: 12px;
+  transform-origin: top center;
+}
+
+.left-leg { left: 16px; }
+.right-leg { right: 16px; }
+
+#bear.running .left-leg {
+  animation: stepLeft 0.28s infinite alternate;
+}
+
+#bear.running .right-leg {
+  animation: stepRight 0.28s infinite alternate;
+}
+
+@keyframes stepLeft {
+  from { transform: translateX(-3px) rotate(8deg); }
+  to { transform: translateX(3px) rotate(-8deg); }
+}
+
+@keyframes stepRight {
+  from { transform: translateX(3px) rotate(-8deg); }
+  to { transform: translateX(-3px) rotate(8deg); }
+}
+
+.shoe {
+  position: absolute;
+  bottom: -8px;
+  left: -2px;
+  width: 28px;
+  height: 24px;
+  background: #ece8ff;
+  border: 2px solid #726bb0;
+  border-radius: 8px 8px 10px 10px;
+  box-shadow: 0 0 0 rgba(248, 211, 63, 0);
+}
+
+.shoe::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  width: 13px;
+  height: 11px;
+  border-left: 2px solid #726bb0;
+  border-top: 2px solid #726bb0;
+  border-radius: 7px 0 0 0;
+}
+
+.shoe-star {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  font-size: 11px;
+  color: #f8d33f;
+}
+
+#bear.powered .shoe {
+  box-shadow: 0 0 12px rgba(248, 211, 63, 0.8);
+}
+
+.star {
+  position: absolute;
+  font-size: 30px;
+  user-select: none;
+}
+
+.learningStar {
+  filter: drop-shadow(0 0 8px gold);
+}
+
+.hidden {
+  display: none;
+}
+
+#hud {
+  margin-top: 10px;
+  font-size: 22px;
+}
+
+#hud p {
+  margin: 4px;
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bramble the Bear: Star Catcher</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Bramble the Bear: Star Catcher</h1>
+
+  <div id="startScreen">
+    <h2>Welcome to Bramble’s Forest</h2>
+    <p>Catch stars, answer learning questions, and help Bramble grow.</p>
+    <button id="startButton">Start Game</button>
+  </div>
+
+  <div id="questionBox" class="hidden">
+    <h2 id="questionText">Question goes here</h2>
+    <div id="answerButtons">
+      <button class="answerBtn" id="answer0"></button>
+      <button class="answerBtn" id="answer1"></button>
+      <button class="answerBtn" id="answer2"></button>
+    </div>
+  </div>
+
+  <div id="levelBox" class="hidden">
+    <h2 id="levelTitle">Level Complete!</h2>
+    <p id="levelMessage">Nice job helping Bramble.</p>
+    <button id="nextLevelButton">Next Level</button>
+  </div>
+
+  <div id="gameArea">
+    <div id="moon"></div>
+    <div class="tree tree1"></div>
+    <div class="tree tree2"></div>
+    <div class="tree tree3"></div>
+    <div id="ground"></div>
+
+    <div id="bear">
+      <div id="bearHead">
+        <div class="ear left-ear"></div>
+        <div class="ear right-ear"></div>
+        <div id="bearFace">
+          <div class="eye left-eye"></div>
+          <div class="eye right-eye"></div>
+          <div id="snout">
+            <div id="nose"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="bearNeck"></div>
+
+      <div id="bearBody">
+        <div class="arm left-arm"></div>
+        <div class="arm right-arm"></div>
+
+        <div class="leg left-leg">
+          <div class="shoe">
+            <div class="shoe-star">★</div>
+          </div>
+        </div>
+
+        <div class="leg right-leg">
+          <div class="shoe">
+            <div class="shoe-star">★</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="hud">
+    <p>Level: <span id="levelText">1</span></p>
+    <p>Score: <span id="score">0</span></p>
+    <p>Goal: <span id="goalText">10</span></p>
+    <p>Size: <span id="sizeText">1.0x</span></p>
+    <button id="pauseButton">Pause</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
