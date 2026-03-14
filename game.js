@@ -1,36 +1,49 @@
 const gameArea = document.getElementById("gameArea");
 const bear = document.getElementById("bear");
 const bearSprite = document.getElementById("bearSprite");
+
 const scoreDisplay = document.getElementById("score");
 const sizeText = document.getElementById("sizeText");
 const levelText = document.getElementById("levelText");
 const goalText = document.getElementById("goalText");
 const livesText = document.getElementById("livesText");
 
-const startButton = document.getElementById("startButton");
-const startScreen = document.getElementById("startScreen");
-
-const questionBox = document.getElementById("questionBox");
-const questionText = document.getElementById("questionText");
-
-const levelBox = document.getElementById("levelBox");
-const levelTitle = document.getElementById("levelTitle");
-const levelMessage = document.getElementById("levelMessage");
-const nextLevelButton = document.getElementById("nextLevelButton");
-
-const gameOverBox = document.getElementById("gameOverBox");
-const gameOverMessage = document.getElementById("gameOverMessage");
-const restartButton = document.getElementById("restartButton");
-
-const pauseButton = document.getElementById("pauseButton");
-const pauseOverlay = document.getElementById("pauseOverlay");
-
-const playerNameInput = document.getElementById("playerName");
 const currentPlayerText = document.getElementById("currentPlayer");
 const bestPlayerText = document.getElementById("bestPlayer");
+const bestPlayerStartText = document.getElementById("bestPlayerStart");
 const highScoreText = document.getElementById("highScore");
 const hudHighScoreText = document.getElementById("hudHighScore");
+
+const startButton = document.getElementById("startButton");
 const fullscreenButton = document.getElementById("fullscreenButton");
+const pauseButton = document.getElementById("pauseButton");
+const nextLevelButton = document.getElementById("nextLevelButton");
+const restartButton = document.getElementById("restartButton");
+const storyButton = document.getElementById("storyButton");
+
+const startScreen = document.getElementById("startScreen");
+const questionBox = document.getElementById("questionBox");
+const levelBox = document.getElementById("levelBox");
+const gameOverBox = document.getElementById("gameOverBox");
+const pauseOverlay = document.getElementById("pauseOverlay");
+const storyBox = document.getElementById("storyBox");
+
+const questionText = document.getElementById("questionText");
+const levelTitle = document.getElementById("levelTitle");
+const levelMessage = document.getElementById("levelMessage");
+const gameOverMessage = document.getElementById("gameOverMessage");
+const storyTitle = document.getElementById("storyTitle");
+const storyMessage = document.getElementById("storyMessage");
+
+const growthFill = document.getElementById("growthFill");
+const growthText = document.getElementById("growthText");
+
+const fireflyLayer = document.getElementById("fireflyLayer");
+const sparkleLayer = document.getElementById("sparkleLayer");
+const floatingScoreLayer = document.getElementById("floatingScoreLayer");
+const flashOverlay = document.getElementById("flashOverlay");
+
+const playerNameInput = document.getElementById("playerName");
 
 const answerButtons = [
   document.getElementById("answer0"),
@@ -44,9 +57,12 @@ const STORAGE_KEYS = {
   playerName: "bramble_player_name"
 };
 
-const bgMusic = new Audio();
+const bgMusic = new Audio("forest_theme.m4a");
 bgMusic.loop = true;
 bgMusic.volume = 0.35;
+
+const levelCompleteMusic = new Audio("level_complete.m4a");
+levelCompleteMusic.volume = 0.55;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -70,21 +86,21 @@ function tone(freq, start, duration, type = "sine", volume = 0.06) {
 function playStarSound() {
   const now = audioCtx.currentTime;
   tone(880, now, 0.05, "triangle", 0.05);
-  tone(1174.66, now + 0.04, 0.07, "triangle", 0.05);
+  tone(1174.66, now + 0.04, 0.08, "triangle", 0.05);
 }
 
 function playCorrectSound() {
   const now = audioCtx.currentTime;
-  tone(523.25, now, 0.10, "sine", 0.05);
-  tone(659.25, now + 0.11, 0.10, "sine", 0.05);
-  tone(783.99, now + 0.22, 0.14, "sine", 0.05);
+  tone(523.25, now, 0.08, "sine", 0.05);
+  tone(659.25, now + 0.1, 0.09, "sine", 0.05);
+  tone(783.99, now + 0.2, 0.13, "sine", 0.05);
 }
 
 function playHurtSound() {
   const now = audioCtx.currentTime;
   tone(220, now, 0.12, "sawtooth", 0.07);
   tone(180, now + 0.08, 0.16, "sawtooth", 0.07);
-  tone(140, now + 0.16, 0.20, "sawtooth", 0.06);
+  tone(140, now + 0.16, 0.18, "sawtooth", 0.06);
 }
 
 function playBonusSound() {
@@ -121,14 +137,20 @@ let heartCountdown = 0;
 let nextHeartThreshold = 26;
 
 let bearScale = 1;
+const HERO_FORM_SCALE = 1.8;
 let lastMoveX = bearX;
 let currentLevel = 1;
 let levelGoal = 12;
-let spawnRate = 950;
+let spawnRate = 920;
 let lives = 3;
 let poweredTimeout = null;
 
 let purplePower = 0;
+let correctAnswerCount = 0;
+const ANSWERS_TO_HERO = 6;
+const GROWTH_STEPS = [1.00, 1.08, 1.16, 1.24, 1.32, 1.42];
+
+let heroFormActive = false;
 let magnetActive = false;
 let capeActive = false;
 let crownActive = false;
@@ -150,15 +172,9 @@ let pendingLevelCheckAfterQuestion = false;
 let lastPointerX = null;
 let lastMoveDirection = 0;
 
-const spriteMap = {
-  idle1: "bramble_idle_1.png",
-  idle2: "bramble_idle_2.png",
-  blink: "bramble_blink.png",
-  reach: "bramble_reach.png",
-  happy: "bramble_happy.png"
-};
+let pendingStoryAdvance = false;
 
- const levelGoals = [18, 26, 38, 52, 68, 86, 106, 128, 152];
+const levelGoals = [18, 26, 38, 52, 68, 86, 106, 128, 152];
 
 const questionSets = {
   easy: [
@@ -191,6 +207,65 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function isFoxLevel() {
+  return currentLevel >= 4 && currentLevel <= 6;
+}
+
+function getSpriteMap() {
+  if (isFoxLevel()) {
+    if (heroFormActive) {
+      return {
+        idle1: "fox_power_idle_1.png",
+        idle2: "fox_power_idle_2.png",
+        blink: "fox_power_idle_1.png",
+        reach: "fox_power_reach.png",
+        happy: "fox_power_celebrate.png"
+      };
+    }
+
+    return {
+      idle1: "fox_idle_1.png",
+      idle2: "fox_idle_2.png",
+      blink: "fox_idle_1.png",
+      reach: "fox_reach.png",
+      happy: "fox_celebrate.png"
+    };
+  }
+
+  if (heroFormActive) {
+    return {
+      idle1: "bramble_power_idle_1.png",
+      idle2: "bramble_power_idle_2.png",
+      blink: "bramble_power_idle_1.png",
+      reach: "bramble_power_reach.png",
+      happy: "bramble_power_celebrate.png"
+    };
+  }
+
+  return {
+    idle1: "bramble_idle_1.png",
+    idle2: "bramble_idle_2.png",
+    blink: "bramble_blink.png",
+    reach: "bramble_reach.png",
+    happy: "bramble_happy.png"
+  };
+}
+
+function getCurrentSpriteFile(name) {
+  return getSpriteMap()[name];
+}
+
+function setBearSprite(name) {
+  const spriteFile = getCurrentSpriteFile(name);
+  if (!bearSprite || !spriteFile) return;
+  bearSprite.src = spriteFile;
+}
+
+function applyCharacterMode() {
+  bear.classList.toggle("foxMode", isFoxLevel());
+  setBearSprite(idleFrameToggle ? "idle2" : "idle1");
+}
+
 function getLevelGoal(level) {
   if (level <= levelGoals.length) return levelGoals[level - 1];
   return levelGoals[levelGoals.length - 1] + (level - levelGoals.length) * 22;
@@ -198,7 +273,7 @@ function getLevelGoal(level) {
 
 function updateLevelGoal() {
   levelGoal = getLevelGoal(currentLevel);
-  if (goalText) goalText.textContent = levelGoal;
+  goalText.textContent = levelGoal;
 }
 
 function getQuestionPoolForLevel() {
@@ -213,9 +288,71 @@ function livesToHearts() {
   return hearts || "0";
 }
 
-function setBearSprite(name) {
-  if (!bearSprite || !spriteMap[name]) return;
-  bearSprite.src = spriteMap[name];
+function updateGrowthHud() {
+  const percent = Math.min(correctAnswerCount / ANSWERS_TO_HERO, 1) * 100;
+  growthFill.style.width = `${percent}%`;
+  growthText.textContent = `${correctAnswerCount} / ${ANSWERS_TO_HERO}`;
+}
+
+function updateHud() {
+  levelText.textContent = currentLevel;
+  scoreDisplay.textContent = score;
+  livesText.textContent = livesToHearts();
+
+  currentPlayerText.textContent = currentPlayerName;
+  bestPlayerText.textContent = bestPlayerName;
+  bestPlayerStartText.textContent = bestPlayerName;
+  highScoreText.textContent = highScore;
+  hudHighScoreText.textContent =
+    bestPlayerName && bestPlayerName !== "None yet"
+      ? `${bestPlayerName} - ${highScore}`
+      : "0";
+
+  updateGrowthHud();
+}
+
+function updateBearScale() {
+  bear.style.setProperty("--bearScale", bearScale);
+  sizeText.textContent = `${bearScale.toFixed(2)}x`;
+}
+
+function flashScreen() {
+  flashOverlay.classList.remove("flash");
+  void flashOverlay.offsetWidth;
+  flashOverlay.classList.add("flash");
+}
+
+function pulseHero() {
+  bear.classList.remove("heroPulse");
+  void bear.offsetWidth;
+  bear.classList.add("heroPulse");
+}
+
+function createSparkBurst(x, y, amount = 6, symbol = "✨") {
+  for (let i = 0; i < amount; i++) {
+    const spark = document.createElement("div");
+    spark.className = "spark";
+    spark.textContent = symbol;
+    spark.style.left = `${x + randomInt(-18, 18)}px`;
+    spark.style.top = `${y + randomInt(-18, 18)}px`;
+    spark.style.animationDuration = `${randomInt(500, 850)}ms`;
+    sparkleLayer.appendChild(spark);
+    setTimeout(() => spark.remove(), 900);
+  }
+}
+
+function createFloatingScore(text, x, y, type = "good") {
+  const el = document.createElement("div");
+  el.className = `floatScore ${type}`;
+  el.textContent = text;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  floatingScoreLayer.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+function setRunning(isRunning) {
+  bear.classList.toggle("running", isRunning);
 }
 
 function returnBearToIdle() {
@@ -226,12 +363,10 @@ function returnBearToIdle() {
 function showBearPose(name, duration = 220) {
   clearTimeout(spriteTimeout);
   setBearSprite(name);
-  spriteTimeout = setTimeout(() => {
-    returnBearToIdle();
-  }, duration);
+  spriteTimeout = setTimeout(returnBearToIdle, duration);
 }
 
-function celebrateBear(duration = 900) {
+function celebrateBear(duration = 850) {
   bear.classList.add("powered");
   clearTimeout(poweredTimeout);
   poweredTimeout = setTimeout(() => {
@@ -240,10 +375,11 @@ function celebrateBear(duration = 900) {
 }
 
 function playHurtReaction() {
-  if (!bearSprite) return;
-
   setBearSprite("blink");
   bear.classList.remove("running");
+  gameArea.classList.remove("shake");
+  void gameArea.offsetWidth;
+  gameArea.classList.add("shake");
 
   bearSprite.animate(
     [
@@ -283,6 +419,7 @@ function updatePowerClasses() {
   bear.classList.toggle("capeOn", capeActive);
   bear.classList.toggle("crownOn", crownActive);
   bear.classList.toggle("speedOn", speedWrapActive);
+  bear.classList.toggle("builtInPowerArt", heroFormActive);
 }
 
 function activateTimedPower(powerName, durationMs) {
@@ -320,59 +457,56 @@ function activateTimedPower(powerName, durationMs) {
 }
 
 function addPurplePower(amount = 1) {
-  const previousPurple = purplePower;
   purplePower += amount;
 
-  if (previousPurple < 2 && purplePower >= 2) {
-    activateTimedPower("magnet", 10000);
-    playMagnetSound();
-    celebrateBear(700);
-  }
-  if (previousPurple < 4 && purplePower >= 4) {
-    activateTimedPower("cape", 10000);
-    playCorrectSound();
-    celebrateBear(850);
-  }
-  if (previousPurple < 6 && purplePower >= 6) {
-    crownActive = true;
-updatePowerClasses();
-    playCorrectSound();
-    celebrateBear(950);
-  }
-  if (previousPurple < 8 && purplePower >= 8) {
-    activateTimedPower("speed", 8000);
-    playMagnetSound();
-    celebrateBear(1100);
+  playBonusSound();
+  score += 2 * amount;
+  updateHud();
+  celebrateBear(450);
+
+  const rect = bear.getBoundingClientRect();
+  const areaRect = gameArea.getBoundingClientRect();
+  const hitX = rect.left - areaRect.left + rect.width / 2;
+  const hitY = rect.top - areaRect.top + rect.height / 2;
+
+  createSparkBurst(hitX, hitY, 7, "✨");
+  createFloatingScore(`+${2 * amount}`, hitX, hitY, "good");
+
+  if (score >= levelGoal) {
+    showLevelComplete();
   }
 }
+function applyLearningProgress() {
+  const becameHero = !heroFormActive && correctAnswerCount >= ANSWERS_TO_HERO;
 
-function updateBearScale() {
-  bear.style.setProperty("--bearScale", bearScale);
-  if (sizeText) sizeText.textContent = bearScale.toFixed(1) + "x";
-}
-
-function updateHud() {
-  levelText.textContent = currentLevel;
-  scoreDisplay.textContent = score;
-  livesText.textContent = livesToHearts();
-
-  if (currentPlayerText) currentPlayerText.textContent = currentPlayerName;
-  if (bestPlayerText) bestPlayerText.textContent = bestPlayerName;
-  if (highScoreText) highScoreText.textContent = highScore;
-
-  if (hudHighScoreText) {
-    hudHighScoreText.textContent =
-      bestPlayerName && bestPlayerName !== "None yet"
-        ? `${bestPlayerName} - ${highScore}`
-        : "0";
-  }
-}
-
-function setRunning(isRunning) {
-  if (isRunning) {
-    bear.classList.add("running");
+  if (correctAnswerCount >= ANSWERS_TO_HERO) {
+    heroFormActive = true;
+    bearScale = HERO_FORM_SCALE;
   } else {
-    bear.classList.remove("running");
+    heroFormActive = false;
+    const stepIndex = Math.min(correctAnswerCount, GROWTH_STEPS.length - 1);
+    bearScale = GROWTH_STEPS[stepIndex];
+  }
+
+  updatePowerClasses();
+  updateBearScale();
+  applyCharacterMode();
+  updateGrowthHud();
+
+  if (becameHero) {
+    playCorrectSound();
+    flashScreen();
+    pulseHero();
+    celebrateBear(1000);
+
+    const rect = bear.getBoundingClientRect();
+    const areaRect = gameArea.getBoundingClientRect();
+    createSparkBurst(
+      rect.left - areaRect.left + rect.width / 2,
+      rect.top - areaRect.top + rect.height / 2,
+      11,
+      "✨"
+    );
   }
 }
 
@@ -392,7 +526,6 @@ function moveBear(clientX) {
 
   if (speedWrapActive) {
     const edgeZone = 14;
-
     if (targetX <= 0 && lastMoveDirection < 0 && clientX <= rect.left + edgeZone) {
       bearX = maxX;
     } else if (targetX >= maxX && lastMoveDirection > 0 && clientX >= rect.right - edgeZone) {
@@ -403,16 +536,12 @@ function moveBear(clientX) {
       bearX = targetX;
     }
   } else {
-    if (targetX < 0) {
-      bearX = 0;
-    } else if (targetX > maxX) {
-      bearX = maxX;
-    } else {
-      bearX = targetX;
-    }
+    if (targetX < 0) bearX = 0;
+    else if (targetX > maxX) bearX = maxX;
+    else bearX = targetX;
   }
 
-  bear.style.left = bearX + "px";
+  bear.style.left = `${bearX}px`;
 
   if (Math.abs(bearX - lastMoveX) > 2) {
     setRunning(true);
@@ -432,20 +561,14 @@ function loadPlayerData() {
   bestPlayerName = savedBestPlayer && savedBestPlayer.trim() ? savedBestPlayer.trim() : "None yet";
   highScore = savedHighScore ? parseInt(savedHighScore, 10) || 0 : 0;
 
-  if (playerNameInput) {
-    playerNameInput.value = currentPlayerName === "Guest" ? "" : currentPlayerName;
-  }
-
+  playerNameInput.value = currentPlayerName === "Guest" ? "" : currentPlayerName;
   updateHud();
 }
 
 function saveCurrentPlayerName() {
-  if (!playerNameInput) return;
-
   const enteredName = playerNameInput.value.trim();
   currentPlayerName = enteredName || "Guest";
   localStorage.setItem(STORAGE_KEYS.playerName, currentPlayerName);
-
   updateHud();
 }
 
@@ -456,7 +579,6 @@ function maybeSaveHighScore() {
     localStorage.setItem(STORAGE_KEYS.highScore, String(highScore));
     localStorage.setItem(STORAGE_KEYS.bestPlayer, bestPlayerName);
   }
-
   updateHud();
 }
 
@@ -470,73 +592,30 @@ function isFullscreenActive() {
 
 async function enterFullscreen() {
   const target = document.documentElement;
-
-  if (target.requestFullscreen) {
-    await target.requestFullscreen();
-  } else if (target.webkitRequestFullscreen) {
-    await target.webkitRequestFullscreen();
-  } else if (target.msRequestFullscreen) {
-    await target.msRequestFullscreen();
-  }
+  if (target.requestFullscreen) await target.requestFullscreen();
+  else if (target.webkitRequestFullscreen) await target.webkitRequestFullscreen();
+  else if (target.msRequestFullscreen) await target.msRequestFullscreen();
 }
 
 async function exitFullscreen() {
-  if (document.exitFullscreen) {
-    await document.exitFullscreen();
-  } else if (document.webkitExitFullscreen) {
-    await document.webkitExitFullscreen();
-  } else if (document.msExitFullscreen) {
-    await document.msExitFullscreen();
-  }
+  if (document.exitFullscreen) await document.exitFullscreen();
+  else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+  else if (document.msExitFullscreen) await document.msExitFullscreen();
 }
 
 function updateFullscreenButton() {
-  if (!fullscreenButton) return;
   fullscreenButton.textContent = isFullscreenActive() ? "Exit Fullscreen" : "Fullscreen";
 }
 
 async function toggleFullscreen() {
   try {
-    if (isFullscreenActive()) {
-      await exitFullscreen();
-    } else {
-      await enterFullscreen();
-    }
+    if (isFullscreenActive()) await exitFullscreen();
+    else await enterFullscreen();
   } catch (error) {
     console.log("Fullscreen unavailable:", error);
   }
   updateFullscreenButton();
 }
-
-document.addEventListener("mousemove", (e) => {
-  if (!gameStarted || gamePaused) return;
-  moveBear(e.clientX);
-});
-
-gameArea.addEventListener("touchstart", (e) => {
-  if (!gameStarted || gamePaused) return;
-
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-
-  const touch = e.touches[0];
-  lastPointerX = touch.clientX;
-  moveBear(touch.clientX);
-});
-
-gameArea.addEventListener("touchmove", (e) => {
-  if (!gameStarted || gamePaused) return;
-
-  e.preventDefault();
-
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-
-  const touch = e.touches[0];
-  moveBear(touch.clientX);
-});
 
 function clearStars() {
   document.querySelectorAll(".star, .badStar, .bonusStar, .heartStar").forEach(item => item.remove());
@@ -556,7 +635,37 @@ function pauseGame() {
   }
 }
 
-pauseButton.addEventListener("click", pauseGame);
+function getStoryForLevel(level) {
+  if (level === 4) {
+    return {
+      title: "A New Friend Appears",
+      text: "Bramble reaches deeper into the forest and meets a clever fox. The adventure changes, and the forest feels faster now."
+    };
+  }
+
+  if (level === 7) {
+    return {
+      title: "Return of the Bear Hero",
+      text: "Bramble returns stronger than before, carrying everything learned in the glowing woods."
+    };
+  }
+
+  return null;
+}
+
+function showStoryCard(level) {
+  const story = getStoryForLevel(level);
+  if (!story) return false;
+
+  gamePaused = true;
+  pendingStoryAdvance = true;
+  bgMusic.pause();
+
+  storyTitle.textContent = story.title;
+  storyMessage.textContent = story.text;
+  storyBox.classList.remove("hidden");
+  return true;
+}
 
 function showQuestion() {
   gamePaused = true;
@@ -572,13 +681,23 @@ function showQuestion() {
   answerButtons.forEach((btn, index) => {
     btn.textContent = q.answers[index];
     btn.onclick = () => {
+      const rect = bear.getBoundingClientRect();
+      const areaRect = gameArea.getBoundingClientRect();
+      const cx = rect.left - areaRect.left + rect.width / 2;
+      const cy = rect.top - areaRect.top + rect.height / 2;
+
       if (index === q.correct) {
         playCorrectSound();
         score += 1;
-        bearScale = Math.min(bearScale + 0.08, 1.8);
-        updateBearScale();
+        correctAnswerCount = Math.min(correctAnswerCount + 1, ANSWERS_TO_HERO);
+        applyLearningProgress();
         updateHud();
+        pulseHero();
         celebrateBear(650);
+        createSparkBurst(cx, cy, 8, "✨");
+        createFloatingScore("+1", cx, cy - 10, "good");
+      } else {
+        createFloatingScore("Try Again!", cx - 20, cy - 10, "bad");
       }
 
       questionBox.classList.add("hidden");
@@ -602,9 +721,24 @@ function loseLife() {
   playHurtSound();
   playHurtReaction();
 
+  const rect = bear.getBoundingClientRect();
+  const areaRect = gameArea.getBoundingClientRect();
+  createFloatingScore("-1 life", rect.left - areaRect.left + rect.width / 2 - 10, rect.top - areaRect.top, "bad");
+
   lives--;
-  bearScale = Math.max(0.8, bearScale - 0.05);
+  bearScale = 1;
+  purplePower = 0;
+  heroFormActive = false;
+  magnetActive = false;
+  capeActive = false;
+  crownActive = false;
+  speedWrapActive = false;
+  correctAnswerCount = 0;
+
+  clearPowerTimers();
+  updatePowerClasses();
   updateBearScale();
+  applyCharacterMode();
   updateHud();
 
   if (lives <= 0) {
@@ -615,13 +749,19 @@ function loseLife() {
 function awardHeart() {
   playHeartSound();
 
+  const rect = bear.getBoundingClientRect();
+  const areaRect = gameArea.getBoundingClientRect();
+  createFloatingScore("+1 life", rect.left - areaRect.left + rect.width / 2 - 10, rect.top - areaRect.top, "heart");
+
   if (lives < 4) {
     lives++;
   } else {
     score += 3;
+    createFloatingScore("+3", rect.left - areaRect.left + rect.width / 2 + 18, rect.top - areaRect.top - 18, "good");
   }
 
   celebrateBear(500);
+  createSparkBurst(rect.left - areaRect.left + rect.width / 2, rect.top - areaRect.top + rect.height / 2, 6, "💖");
   updateHud();
 
   if (score >= levelGoal) {
@@ -629,15 +769,18 @@ function awardHeart() {
   }
 }
 
-function showGameOver() {gamePaused = true;
+function showGameOver() {
+  gamePaused = true;
   clearInterval(starSpawner);
   clearStars();
   pauseOverlay.classList.add("hidden");
   maybeSaveHighScore();
   playHurtSound();
+
   gameOverMessage.textContent = `${currentPlayerName} reached Level ${currentLevel}! Final Score: ${score}. Best Score: ${highScore}.`;
   bgMusic.pause();
   setBearSprite("blink");
+
   setTimeout(() => gameOverBox.classList.remove("hidden"), 250);
 }
 
@@ -646,45 +789,71 @@ function showLevelComplete() {
   celebrateBear(1200);
   clearInterval(starSpawner);
   maybeSaveHighScore();
+
   levelTitle.textContent = "Level Complete!";
   levelMessage.textContent = `${currentPlayerName} reached the goal of ${levelGoal} points.`;
   levelBox.classList.remove("hidden");
+
   bgMusic.pause();
+  levelCompleteMusic.currentTime = 0;
+  levelCompleteMusic.play().catch(() => {});
   setBearSprite("happy");
+  flashScreen();
+
+  const rect = bear.getBoundingClientRect();
+  const areaRect = gameArea.getBoundingClientRect();
+  createSparkBurst(rect.left - areaRect.left + rect.width / 2, rect.top - areaRect.top + rect.height / 2, 12, "✨");
 }
 
 function nextLevel() {
   levelBox.classList.add("hidden");
   currentLevel++;
   score = 0;
+
   learningCountdown = 0;
   bonusCountdown = 0;
   dangerCountdown = 0;
   heartCountdown = 0;
   nextHeartThreshold = currentLevel < 3 ? 9999 : randomInt(22, 32);
 
+  if (currentLevel === 4 || currentLevel === 7) {
+    bearScale = 1;
+    purplePower = 0;
+    correctAnswerCount = 0;
+    heroFormActive = false;
+    magnetActive = false;
+    capeActive = false;
+    crownActive = false;
+    speedWrapActive = false;
+    clearPowerTimers();
+    updatePowerClasses();
+  }
+
   updateLevelGoal();
-  spawnRate = Math.max(430, spawnRate - 45);
+  spawnRate = Math.max(420, spawnRate - 45);
+  updateBearScale();
   updateHud();
   clearStars();
+  applyCharacterMode();
 
   clearInterval(starSpawner);
-  gamePaused = false;
-  pauseButton.textContent = "Pause";
   pauseOverlay.classList.add("hidden");
+  pauseButton.textContent = "Pause";
   returnBearToIdle();
+
+  if (showStoryCard(currentLevel)) {
+    return;
+  }
+
+  gamePaused = false;
   starSpawner = setInterval(createItem, spawnRate);
   bgMusic.play().catch(() => {});
 }
-
-nextLevelButton.addEventListener("click", nextLevel);
 
 function restartGame() {
   gameOverBox.classList.add("hidden");
   startFreshGame();
 }
-
-restartButton.addEventListener("click", restartGame);
 
 function applyMagnet(x) {
   if (!magnetActive) return x;
@@ -781,22 +950,22 @@ function createItem() {
   } else if (itemType === "bonus") {
     item.classList.add("bonusStar");
     item.innerText = "🟣";
-    speed = 4;
+    speed = 4.1;
     dx = Math.random() > 0.5 ? 1.3 : -1.3;
   } else if (itemType === "bad") {
     item.classList.add("badStar");
     item.innerText = "🔴";
-    speed = 4.6 + (currentLevel - 1) * 0.3;
+    speed = 4.7 + (currentLevel - 1) * 0.3;
     dx = Math.random() > 0.5 ? 1.8 : -1.8;
   } else {
     item.classList.add("star");
     item.innerText = "⭐";
-    speed = 4 + (currentLevel - 1) * 0.3;
+    speed = 4 + (currentLevel - 1) * 0.28;
     dx = Math.random() > 0.5 ? 1.5 : -1.5;
   }
 
-  item.style.left = x + "px";
-  item.style.top = y + "px";
+  item.style.left = `${x}px`;
+  item.style.top = `${y}px`;
   gameArea.appendChild(item);
 
   const fall = setInterval(() => {
@@ -813,8 +982,8 @@ function createItem() {
       x = applyMagnet(x);
     }
 
-    item.style.top = y + "px";
-    item.style.left = x + "px";
+    item.style.top = `${y}px`;
+    item.style.left = `${x}px`;
 
     const itemRect = item.getBoundingClientRect();
     const hitbox = getBearHitbox(itemType);
@@ -826,40 +995,37 @@ function createItem() {
       itemRect.right > hitbox.left;
 
     if (hit) {
+      const areaRect = gameArea.getBoundingClientRect();
+      const hitX = itemRect.left - areaRect.left + itemRect.width / 2;
+      const hitY = itemRect.top - areaRect.top + itemRect.height / 2;
+
       item.remove();
       clearInterval(fall);
 
       if (itemType === "bad") {
+        createSparkBurst(hitX, hitY, 5, "💥");
         loseLife();
         return;
       }
 
       if (itemType === "heart") {
+        createSparkBurst(hitX, hitY, 5, "💖");
         awardHeart();
         return;
       }
 
-      if (itemType === "bonus") {
-        playBonusSound();
-        addPurplePower(1);
-        score += 2;
-        bearScale = Math.min(bearScale + 0.03, 1.8);
-        updateBearScale();
-        updateHud();
-        celebrateBear(450);
-
-        if (score >= levelGoal) {
-          showLevelComplete();
-        }
-        return;
-      }
-
+if (itemType === "bonus") {
+  addPurplePower(1);
+  return;
+}
       if (itemType === "learning") {
         playStarSound();
         showBearPose("reach", 180);
         score += 1;
         updateHud();
         pendingLevelCheckAfterQuestion = true;
+        createSparkBurst(hitX, hitY, 6, "✨");
+        createFloatingScore("+1", hitX, hitY, "good");
         showQuestion();
         return;
       }
@@ -868,6 +1034,8 @@ function createItem() {
       showBearPose("reach", 180);
       score += 1;
       updateHud();
+      createSparkBurst(hitX, hitY, 4, "✨");
+      createFloatingScore("+1", hitX, hitY, "good");
 
       if (score >= levelGoal) {
         showLevelComplete();
@@ -879,6 +1047,51 @@ function createItem() {
       clearInterval(fall);
     }
   }, 30);
+}
+
+function resetCharacterState() {
+  bearScale = 1;
+  purplePower = 0;
+  correctAnswerCount = 0;
+  heroFormActive = false;
+  magnetActive = false;
+  capeActive = false;
+  crownActive = false;
+  speedWrapActive = false;
+  clearPowerTimers();
+  updatePowerClasses();
+  applyLearningProgress();
+  updateHud();
+}
+
+function debugJumpToLevel(targetLevel) {
+  currentLevel = targetLevel;
+  score = 0;
+  learningCountdown = 0;
+  bonusCountdown = 0;
+  dangerCountdown = 0;
+  heartCountdown = 0;
+  nextHeartThreshold = targetLevel < 4 ? 9999 : randomInt(22, 32);
+
+  resetCharacterState();
+  updateLevelGoal();
+  updateHud();
+  clearStars();
+  applyCharacterMode();
+  returnBearToIdle();
+}
+
+function spawnFireflies() {
+  fireflyLayer.innerHTML = "";
+  for (let i = 0; i < 14; i++) {
+    const fly = document.createElement("div");
+    fly.className = "firefly";
+    fly.style.left = `${randomInt(4, 96)}%`;
+    fly.style.top = `${randomInt(8, 78)}%`;
+    fly.style.animationDuration = `${randomInt(4000, 9000)}ms, ${randomInt(900, 1800)}ms`;
+    fly.style.animationDelay = `${randomInt(0, 2000)}ms`;
+    fireflyLayer.appendChild(fly);
+  }
 }
 
 function startFreshGame() {
@@ -895,10 +1108,13 @@ function startFreshGame() {
 
   gameStarted = true;
   gamePaused = false;
+  pendingStoryAdvance = false;
+
   startScreen.classList.add("hidden");
   questionBox.classList.add("hidden");
   levelBox.classList.add("hidden");
   gameOverBox.classList.add("hidden");
+  storyBox.classList.add("hidden");
   pauseOverlay.classList.add("hidden");
 
   score = 0;
@@ -912,6 +1128,8 @@ function startFreshGame() {
   nextHeartThreshold = 9999;
 
   purplePower = 0;
+  correctAnswerCount = 0;
+  heroFormActive = false;
   magnetActive = false;
   capeActive = false;
   crownActive = false;
@@ -919,7 +1137,7 @@ function startFreshGame() {
   updatePowerClasses();
 
   updateLevelGoal();
-  spawnRate = 950;
+  spawnRate = 920;
 
   lastPointerX = null;
   lastMoveDirection = 0;
@@ -932,7 +1150,7 @@ function startFreshGame() {
 
   pauseButton.textContent = "Pause";
   idleFrameToggle = false;
-  setBearSprite("idle1");
+  applyCharacterMode();
 
   bgMusic.currentTime = 0;
   bgMusic.play().catch(() => {});
@@ -940,7 +1158,45 @@ function startFreshGame() {
   starSpawner = setInterval(createItem, spawnRate);
 }
 
+document.addEventListener("mousemove", (e) => {
+  if (!gameStarted || gamePaused) return;
+  moveBear(e.clientX);
+});
+
+gameArea.addEventListener("touchstart", (e) => {
+  if (!gameStarted || gamePaused) return;
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  const touch = e.touches[0];
+  lastPointerX = touch.clientX;
+  moveBear(touch.clientX);
+});
+
+gameArea.addEventListener("touchmove", (e) => {
+  if (!gameStarted || gamePaused) return;
+  e.preventDefault();
+
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  const touch = e.touches[0];
+  moveBear(touch.clientX);
+}, { passive: false });
+
+pauseButton.addEventListener("click", pauseGame);
 startButton.addEventListener("click", startFreshGame);
+nextLevelButton.addEventListener("click", nextLevel);
+restartButton.addEventListener("click", restartGame);
+
+storyButton.addEventListener("click", () => {
+  storyBox.classList.add("hidden");
+  pendingStoryAdvance = false;
+  gamePaused = false;
+  pauseButton.textContent = "Pause";
+  returnBearToIdle();
+  bgMusic.play().catch(() => {});
+  clearInterval(starSpawner);
+  starSpawner = setInterval(createItem, spawnRate);
+});
 
 if (fullscreenButton) {
   fullscreenButton.addEventListener("click", toggleFullscreen);
@@ -951,9 +1207,10 @@ if (fullscreenButton) {
 
 setInterval(() => {
   if (!gameStarted || gamePaused) return;
-  if (questionBox && !questionBox.classList.contains("hidden")) return;
-  if (levelBox && !levelBox.classList.contains("hidden")) return;
-  if (gameOverBox && !gameOverBox.classList.contains("hidden")) return;
+  if (!questionBox.classList.contains("hidden")) return;
+  if (!levelBox.classList.contains("hidden")) return;
+  if (!gameOverBox.classList.contains("hidden")) return;
+  if (!storyBox.classList.contains("hidden")) return;
 
   idleFrameToggle = !idleFrameToggle;
   returnBearToIdle();
@@ -966,7 +1223,50 @@ setInterval(() => {
   }
 }, 3200);
 
+document.addEventListener("keydown", (e) => {
+  const key = e.key.toLowerCase();
+
+  if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
+    return;
+  }
+
+  if (key === "k") {
+    correctAnswerCount = Math.min(correctAnswerCount + 1, ANSWERS_TO_HERO);
+    applyLearningProgress();
+    updateHud();
+  }
+
+  if (key === "n") {
+    nextLevel();
+  }
+
+  if (key === "b") {
+    addPurplePower(1);
+    updateHud();
+    applyCharacterMode();
+  }
+
+  if (key === "r") {
+    resetCharacterState();
+  }
+
+  if (key === "h") {
+    heroFormActive = !heroFormActive;
+    applyLearningProgress();
+  }
+
+  if (key === "4") {
+    debugJumpToLevel(4);
+  }
+
+  if (key === "7") {
+    debugJumpToLevel(7);
+  }
+});
+
 loadPlayerData();
 updateLevelGoal();
 updateHud();
 updateFullscreenButton();
+applyCharacterMode();
+spawnFireflies();

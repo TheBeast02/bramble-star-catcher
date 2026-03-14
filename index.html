@@ -1,96 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Bramble the Bear: Star Catcher</title>
-  <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Bramble the Bear: Star Catcher Deluxe</title>
+  <link rel="stylesheet" href="style-v2.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
+  <h1>Bramble the Bear: Star Catcher Deluxe</h1>
 
-  <h1>Bramble the Bear: Star Catcher</h1>
+  <div id="gameShell">
+    <div id="gameArea">
+      <div id="skyGlow"></div>
+      <div id="moon"></div>
+      <div id="fireflyLayer"></div>
+      <div id="sparkleLayer"></div>
 
-  <div id="startScreen">
-    <h2>Welcome to Bramble’s Forest</h2>
-    <p>Catch stars, answer questions, and help Bramble grow.</p>
+      <div class="tree tree1"></div>
+      <div class="tree tree2"></div>
+      <div class="tree tree3"></div>
+      <div class="tree tree4"></div>
 
-    <div id="playerSetup">
-      <label for="playerName">Player Name:</label>
-      <input type="text" id="playerName" maxlength="16" placeholder="Enter name">
+      <div id="ground"></div>
+
+      <div id="hudTop">
+        <div class="hudCard">
+          <div class="hudLabel">Level</div>
+          <div class="hudValue" id="levelText">1</div>
+        </div>
+        <div class="hudCard">
+          <div class="hudLabel">Score</div>
+          <div class="hudValue" id="score">0</div>
+        </div>
+        <div class="hudCard">
+          <div class="hudLabel">Goal</div>
+          <div class="hudValue" id="goalText">12</div>
+        </div>
+        <div class="hudCard wide">
+          <div class="hudLabel">Lives</div>
+          <div class="hudValue" id="livesText">❤️❤️❤️</div>
+        </div>
+      </div>
+
+      <div id="hudBottom">
+        <div class="hudBottomLeft">
+          <span class="miniLabel">Player:</span>
+          <span id="currentPlayer">Guest</span>
+        </div>
+        <div class="hudBottomRight">
+          <span class="miniLabel">Best:</span>
+          <span id="bestPlayer">None yet</span>
+          <span class="divider">•</span>
+          <span id="hudHighScore">0</span>
+        </div>
+      </div>
+
+      <div id="bear">
+        <img id="bearSprite" src="bramble_idle_1.png" alt="Character" />
+      </div>
+
+      <div id="floatingScoreLayer"></div>
+
+      <div id="startScreen" class="overlayBox">
+        <div class="titleGlow">✨</div>
+        <h2>Welcome to Bramble’s Forest</h2>
+        <p class="introText">
+          Catch stars, answer questions, grow stronger, and unlock heroic forest forms.
+        </p>
+
+        <div id="playerSetup">
+          <label for="playerName">Player Name:</label>
+          <input type="text" id="playerName" maxlength="16" placeholder="Enter name" />
+        </div>
+
+        <div id="scoreBoard">
+          <p>Best Player: <span id="bestPlayerStart">None yet</span></p>
+          <p>High Score: <span id="highScore">0</span></p>
+        </div>
+
+        <div class="buttonRow">
+          <button id="startButton">Start Adventure</button>
+          <button id="fullscreenButton">Fullscreen</button>
+        </div>
+
+        <p class="smallTip">
+          Mouse or touch to move • Catch stars • Answer learning stars correctly to grow
+        </p>
+      </div>
+
+      <div id="questionBox" class="hidden overlayBox">
+        <h2 id="questionTitle">Learning Moment</h2>
+        <p id="questionText">Question</p>
+        <div id="answerButtons">
+          <button class="answerBtn" id="answer0"></button>
+          <button class="answerBtn" id="answer1"></button>
+          <button class="answerBtn" id="answer2"></button>
+        </div>
+      </div>
+
+      <div id="storyBox" class="hidden overlayBox">
+        <h2 id="storyTitle">Forest Story</h2>
+        <p id="storyMessage"></p>
+        <button id="storyButton">Continue</button>
+      </div>
+
+      <div id="levelBox" class="hidden overlayBox">
+        <h2 id="levelTitle">Level Complete</h2>
+        <p id="levelMessage"></p>
+        <button id="nextLevelButton">Next Level</button>
+      </div>
+
+      <div id="gameOverBox" class="hidden overlayBox">
+        <h2>Game Over</h2>
+        <p id="gameOverMessage"></p>
+        <button id="restartButton">Play Again</button>
+      </div>
+
+      <div id="pauseOverlay" class="hidden overlayBox smallOverlay">
+        <h2>Paused</h2>
+        <p>Tap Resume to continue the adventure.</p>
+      </div>
+
+      <div id="flashOverlay"></div>
     </div>
 
-    <div id="scoreBoard">
-      <p>Best Player: <span id="bestPlayer">None yet</span></p>
-      <p>High Score: <span id="highScore">0</span></p>
-    </div>
-
-    <button id="startButton">Start Game</button>
-    <button id="fullscreenButton">Fullscreen</button>
-  </div>
-
-  <div id="gameArea">
-
-    <div id="hudLeft">
-      <p>Level <span id="levelText">1</span></p>
-      <p>Score <span id="score">0</span></p>
-    </div>
-
-    <div id="hudRight">
-      <p id="livesText">❤️❤️❤️</p>
-    </div>
-
-    <div id="moon"></div>
-
-    <div class="tree tree1"></div>
-    <div class="tree tree2"></div>
-    <div class="tree tree3"></div>
-
-    <div id="ground"></div>
-
-    <div id="bear">
-      <img id="bearSprite" src="bramble_idle_1.png" alt="Bramble the Bear">
-    </div>
-
-    <!-- OVERLAYS NOW LIVE INSIDE THE PLAY AREA -->
-
-    <div id="questionBox" class="hidden overlayBox">
-      <h2 id="questionText">Question</h2>
-      <div id="answerButtons">
-        <button class="answerBtn" id="answer0"></button>
-        <button class="answerBtn" id="answer1"></button>
-        <button class="answerBtn" id="answer2"></button>
+    <div id="controlBar">
+      <button id="pauseButton">Pause</button>
+      <div id="growthMeterWrap">
+        <span class="miniLabel">Learning Power</span>
+        <div id="growthMeter">
+          <div id="growthFill"></div>
+        </div>
+        <span id="growthText">0 / 6</span>
       </div>
     </div>
-
-    <div id="levelBox" class="hidden overlayBox">
-      <h2 id="levelTitle">Level Complete</h2>
-      <p id="levelMessage"></p>
-      <button id="nextLevelButton">Next Level</button>
-    </div>
-
-    <div id="gameOverBox" class="hidden overlayBox">
-      <h2>Game Over</h2>
-      <p id="gameOverMessage"></p>
-      <button id="restartButton">Play Again</button>
-    </div>
-
-    <div id="pauseOverlay" class="hidden overlayBox smallOverlay">
-      <h2>Paused</h2>
-      <p>Tap Resume to keep helping Bramble.</p>
-    </div>
-
   </div>
 
-  <button id="pauseButton">Pause</button>
-
-  <!-- Hidden support fields still required by your JS -->
   <div id="hiddenGameData" class="hidden">
-    <span id="goalText">10</span>
-    <span id="sizeText">1.0x</span>
-    <span id="currentPlayer">Guest</span>
-    <span id="hudHighScore">0</span>
+    <span id="sizeText">1.00x</span>
   </div>
 
-  <script src="game.js"></script>
-
+  <script src="game-v2.js"></script>
 </body>
 </html>
