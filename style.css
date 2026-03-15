@@ -959,3 +959,31 @@ h1 {
   }
 
 }
+/* START SCREEN PANEL */
+.startPanel {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px;
+}
+/* MOBILE LANDSCAPE START SCREEN FIX */
+@media (max-height: 700px) and (orientation: landscape) {
+
+  #startScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  .startPanel {
+    max-width: 340px;
+    padding: 14px;
+  }
+
+  .introText {
+    font-size: 14px;
+  }
+
+  .smallTip {
+    font-size: 12px;
+  }
+
+}
