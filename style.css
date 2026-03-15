@@ -753,6 +753,57 @@ h1 {
   width: 100%;
   max-height: 64dvh;
 }
+#startScreen {
+  padding: 8px 12px;
+  width: min(74%, 480px);
+  top: 2%;
+}
+
+#startScreen h2 {
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+
+.introText {
+  font-size: 11px;
+  line-height: 1.2;
+  margin: 0 auto 6px;
+  max-width: 300px;
+}
+
+#playerSetup {
+  margin: 4px 0;
+}
+
+#playerSetup label {
+  font-size: 12px;
+}
+
+#playerName {
+  font-size: 13px;
+  padding: 6px 8px;
+  width: min(200px, 66%);
+}
+
+#scoreBoard {
+  margin: 6px 0;
+  font-size: 11px;
+}
+
+.buttonRow {
+  gap: 6px;
+}
+
+#startButton,
+#fullscreenButton {
+  font-size: 11px;
+  padding: 5px 8px;
+  margin-top: 2px;
+}
+
+.smallTip {
+  display: none;
+}
   #hudTop {
     top: 6px;
     left: 6px;
