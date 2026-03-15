@@ -729,7 +729,7 @@ h1 {
   }
 }
 /* MOBILE LANDSCAPE GAME MODE */
-@media (max-height: 500px) and (orientation: landscape) {
+@media (max-height: 700px) and (orientation: landscape) {
 
 body {
   padding: 0;
@@ -941,7 +941,7 @@ h1 {
   display: none;
 }
 }
-@media (max-width: 640px) and (orientation: portrait) {
+@media (max-width: 900px) and (orientation: portrait) {
 
   #rotateNotice {
     display: flex;
