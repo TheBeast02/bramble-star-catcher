@@ -955,7 +955,7 @@ h1 {
   .bonusStar,
   .heartStar,
   #controlBar {
-    visibility: hidden;
+    display: none;
   }
 
 }
@@ -968,14 +968,16 @@ h1 {
 /* MOBILE LANDSCAPE START SCREEN FIX */
 @media (max-height: 700px) and (orientation: landscape) {
 
-#startScreen {
-  width: 260px !important;
-  padding: 8px !important;
-  background: red !important;
-  top: 3% !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-}
+  #startScreen {
+    width: min(420px, 72vw);
+    padding: 12px 14px;
+    top: 3%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #controlBar {
+    display: none;
+  }
   #startScreen h2 {
     font-size: 14px;
     margin: 0 0 6px;
