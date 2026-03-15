@@ -568,7 +568,37 @@ h1 {
 #growthText {
   font-size: 14px;
 }
+#rotateNotice {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  background: linear-gradient(180deg, rgba(8, 18, 50, 0.96), rgba(10, 24, 60, 0.98));
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
 
+.rotateBox {
+  width: min(90%, 360px);
+  background: linear-gradient(180deg, rgba(23, 45, 98, 0.96), rgba(13, 28, 68, 0.98));
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.42);
+}
+
+.rotateBox h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.rotateBox p {
+  margin: 0;
+  line-height: 1.5;
+  opacity: 0.95;
+}
 .hidden {
   display: none !important;
 }
@@ -697,4 +727,133 @@ h1 {
   #controlBar {
     justify-content: center;
   }
+}
+/* MOBILE LANDSCAPE GAME MODE */
+@media (max-height: 500px) and (orientation: landscape) {
+
+  body {
+    padding: 2px;
+  }
+
+  #gameShell {
+    width: 100vw;
+  }
+
+  #gameArea {
+    border-radius: 12px;
+  }
+
+  #hudTop {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    gap: 6px;
+  }
+
+  .hudCard {
+    min-width: 60px;
+    padding: 6px 8px;
+    border-radius: 12px;
+  }
+
+  .hudCard.wide {
+    min-width: 92px;
+  }
+
+  .hudLabel {
+    font-size: 9px;
+  }
+
+  .hudValue {
+    font-size: 14px;
+    margin-top: 2px;
+  }
+
+  #hudBottom {
+    left: 8px;
+    right: 8px;
+    bottom: 6px;
+    gap: 6px;
+  }
+
+  .hudBottomLeft,
+  .hudBottomRight {
+    padding: 6px 8px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+
+  #bear {
+    width: 82px;
+    height: 104px;
+    bottom: 2%;
+  }
+
+  #bearSprite,
+  #bear.foxMode #bearSprite,
+  #bear.foxMode.builtInPowerArt #bearSprite {
+    width: 120px;
+    left: -10px;
+    bottom: -8px;
+  }
+
+  .star,
+  .badStar,
+  .bonusStar,
+  .heartStar {
+    font-size: 24px;
+  }
+
+  .overlayBox {
+    width: min(90%, 360px);
+    padding: 14px;
+    top: 4%;
+  }
+
+  .overlayBox h2 {
+    font-size: 20px;
+  }
+
+  #startButton,
+  .answerBtn,
+  #pauseButton,
+  #nextLevelButton,
+  #restartButton,
+  #fullscreenButton,
+  #storyButton {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  #controlBar {
+    margin-top: 6px;
+    gap: 8px;
+  }
+
+  #growthMeterWrap {
+    min-width: 180px;
+    padding: 8px 10px;
+  }
+
+  #growthText {
+    font-size: 12px;
+  }
+}
+@media (max-width: 640px) and (orientation: portrait) {
+
+  #rotateNotice {
+    display: flex;
+  }
+
+  #hudTop,
+  #hudBottom,
+  #bear,
+  .star,
+  .badStar,
+  .bonusStar,
+  .heartStar,
+  #controlBar {
+    visibility: hidden;
+  }
+
 }
