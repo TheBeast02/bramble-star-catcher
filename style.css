@@ -969,21 +969,61 @@ h1 {
 @media (max-height: 700px) and (orientation: landscape) {
 
   #startScreen {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-  .startPanel {
-    max-width: 340px;
-    padding: 14px;
+    width: min(420px, 72vw);
+    padding: 12px 14px;
+    top: 3%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #startScreen h2 {
+    font-size: 14px;
+    margin: 0 0 6px;
+  }
+
+  #startScreen .titleGlow {
+    font-size: 18px;
+    margin-bottom: 2px;
   }
 
   .introText {
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 1.25;
+    margin: 0 auto 8px;
+    max-width: 300px;
   }
 
-  .smallTip {
+  #playerSetup {
+    margin: 6px 0;
+  }
+
+  #playerSetup label {
     font-size: 12px;
   }
 
+  #playerName {
+    font-size: 13px;
+    padding: 6px 8px;
+    width: min(200px, 64%);
+  }
+
+  #scoreBoard {
+    margin: 6px 0;
+    font-size: 11px;
+  }
+
+  .buttonRow {
+    gap: 6px;
+  }
+
+  #startButton,
+  #fullscreenButton {
+    font-size: 11px;
+    padding: 5px 8px;
+    margin-top: 2px;
+  }
+
+  .smallTip {
+    display: none;
+  }
 }
