@@ -27,7 +27,6 @@ const levelBox = document.getElementById("levelBox");
 const gameOverBox = document.getElementById("gameOverBox");
 const pauseOverlay = document.getElementById("pauseOverlay");
 const storyBox = document.getElementById("storyBox");
-const controlBar = document.getElementById("controlBar");
 
 const questionText = document.getElementById("questionText");
 const levelTitle = document.getElementById("levelTitle");
@@ -111,6 +110,13 @@ function playBonusSound() {
   tone(987.77, now + 0.16, 0.12, "triangle", 0.05);
 }
 
+function playMagnetSound() {
+  const now = audioCtx.currentTime;
+  tone(523.25, now, 0.06, "triangle", 0.05);
+  tone(783.99, now + 0.06, 0.08, "triangle", 0.05);
+  tone(1046.5, now + 0.12, 0.12, "triangle", 0.05);
+}
+
 function playHeartSound() {
   const now = audioCtx.currentTime;
   tone(698.46, now, 0.08, "triangle", 0.05);
@@ -139,11 +145,21 @@ let spawnRate = 920;
 let lives = 3;
 let poweredTimeout = null;
 
+let purplePower = 0;
 let correctAnswerCount = 0;
 const ANSWERS_TO_HERO = 6;
 const GROWTH_STEPS = [1.00, 1.08, 1.16, 1.24, 1.32, 1.42];
 
 let heroFormActive = false;
+let magnetActive = false;
+let capeActive = false;
+let crownActive = false;
+let speedWrapActive = false;
+
+let magnetTimer = null;
+let capeTimer = null;
+let crownTimer = null;
+let speedTimer = null;
 
 let spriteTimeout = null;
 let idleFrameToggle = false;
@@ -155,6 +171,7 @@ let highScore = 0;
 let pendingLevelCheckAfterQuestion = false;
 let lastPointerX = null;
 let lastMoveDirection = 0;
+
 let pendingStoryAdvance = false;
 
 const levelGoals = [18, 26, 38, 52, 68, 86, 106, 128, 152];
@@ -284,7 +301,7 @@ function updateHud() {
 
   currentPlayerText.textContent = currentPlayerName;
   bestPlayerText.textContent = bestPlayerName;
-  if (bestPlayerStartText) bestPlayerStartText.textContent = bestPlayerName;
+  bestPlayerStartText.textContent = bestPlayerName;
   highScoreText.textContent = highScore;
   hudHighScoreText.textContent =
     bestPlayerName && bestPlayerName !== "None yet"
@@ -296,7 +313,7 @@ function updateHud() {
 
 function updateBearScale() {
   bear.style.setProperty("--bearScale", bearScale);
-  if (sizeText) sizeText.textContent = `${bearScale.toFixed(2)}x`;
+  sizeText.textContent = `${bearScale.toFixed(2)}x`;
 }
 
 function flashScreen() {
@@ -390,6 +407,75 @@ function playHurtReaction() {
   }, 320);
 }
 
+function clearPowerTimers() {
+  clearTimeout(magnetTimer);
+  clearTimeout(capeTimer);
+  clearTimeout(crownTimer);
+  clearTimeout(speedTimer);
+}
+
+function updatePowerClasses() {
+  bear.classList.toggle("magnetOn", magnetActive);
+  bear.classList.toggle("capeOn", capeActive);
+  bear.classList.toggle("crownOn", crownActive);
+  bear.classList.toggle("speedOn", speedWrapActive);
+  bear.classList.toggle("builtInPowerArt", heroFormActive);
+}
+
+function activateTimedPower(powerName, durationMs) {
+  if (powerName === "magnet") {
+    magnetActive = true;
+    clearTimeout(magnetTimer);
+    magnetTimer = setTimeout(() => {
+      magnetActive = false;
+      updatePowerClasses();
+    }, durationMs);
+  } else if (powerName === "cape") {
+    capeActive = true;
+    clearTimeout(capeTimer);
+    capeTimer = setTimeout(() => {
+      capeActive = false;
+      updatePowerClasses();
+    }, durationMs);
+  } else if (powerName === "crown") {
+    crownActive = true;
+    clearTimeout(crownTimer);
+    crownTimer = setTimeout(() => {
+      crownActive = false;
+      updatePowerClasses();
+    }, durationMs);
+  } else if (powerName === "speed") {
+    speedWrapActive = true;
+    clearTimeout(speedTimer);
+    speedTimer = setTimeout(() => {
+      speedWrapActive = false;
+      updatePowerClasses();
+    }, durationMs);
+  }
+
+  updatePowerClasses();
+}
+
+function addPurplePower(amount = 1) {
+  purplePower += amount;
+
+  playBonusSound();
+  score += 2 * amount;
+  updateHud();
+  celebrateBear(450);
+
+  const rect = bear.getBoundingClientRect();
+  const areaRect = gameArea.getBoundingClientRect();
+  const hitX = rect.left - areaRect.left + rect.width / 2;
+  const hitY = rect.top - areaRect.top + rect.height / 2;
+
+  createSparkBurst(hitX, hitY, 7, "✨");
+  createFloatingScore(`+${2 * amount}`, hitX, hitY, "good");
+
+  if (score >= levelGoal) {
+    showLevelComplete();
+  }
+}
 function applyLearningProgress() {
   const becameHero = !heroFormActive && correctAnswerCount >= ANSWERS_TO_HERO;
 
@@ -402,6 +488,7 @@ function applyLearningProgress() {
     bearScale = GROWTH_STEPS[stepIndex];
   }
 
+  updatePowerClasses();
   updateBearScale();
   applyCharacterMode();
   updateGrowthHud();
@@ -437,9 +524,22 @@ function moveBear(clientX) {
   }
   lastPointerX = clientX;
 
-  if (targetX < 0) bearX = 0;
-  else if (targetX > maxX) bearX = maxX;
-  else bearX = targetX;
+  if (speedWrapActive) {
+    const edgeZone = 14;
+    if (targetX <= 0 && lastMoveDirection < 0 && clientX <= rect.left + edgeZone) {
+      bearX = maxX;
+    } else if (targetX >= maxX && lastMoveDirection > 0 && clientX >= rect.right - edgeZone) {
+      bearX = 0;
+    } else {
+      if (targetX < 0) targetX = 0;
+      if (targetX > maxX) targetX = maxX;
+      bearX = targetX;
+    }
+  } else {
+    if (targetX < 0) bearX = 0;
+    else if (targetX > maxX) bearX = maxX;
+    else bearX = targetX;
+  }
 
   bear.style.left = `${bearX}px`;
 
@@ -504,9 +604,7 @@ async function exitFullscreen() {
 }
 
 function updateFullscreenButton() {
-  if (fullscreenButton) {
-    fullscreenButton.textContent = isFullscreenActive() ? "Exit Fullscreen" : "Fullscreen";
-  }
+  fullscreenButton.textContent = isFullscreenActive() ? "Exit Fullscreen" : "Fullscreen";
 }
 
 async function toggleFullscreen() {
@@ -629,9 +727,16 @@ function loseLife() {
 
   lives--;
   bearScale = 1;
-  correctAnswerCount = 0;
+  purplePower = 0;
   heroFormActive = false;
+  magnetActive = false;
+  capeActive = false;
+  crownActive = false;
+  speedWrapActive = false;
+  correctAnswerCount = 0;
 
+  clearPowerTimers();
+  updatePowerClasses();
   updateBearScale();
   applyCharacterMode();
   updateHud();
@@ -713,8 +818,15 @@ function nextLevel() {
 
   if (currentLevel === 4 || currentLevel === 7) {
     bearScale = 1;
+    purplePower = 0;
     correctAnswerCount = 0;
     heroFormActive = false;
+    magnetActive = false;
+    capeActive = false;
+    crownActive = false;
+    speedWrapActive = false;
+    clearPowerTimers();
+    updatePowerClasses();
   }
 
   updateLevelGoal();
@@ -736,6 +848,42 @@ function nextLevel() {
   gamePaused = false;
   starSpawner = setInterval(createItem, spawnRate);
   bgMusic.play().catch(() => {});
+}
+
+function restartGame() {
+  gameOverBox.classList.add("hidden");
+  startFreshGame();
+}
+
+function applyMagnet(x) {
+  if (!magnetActive) return x;
+
+  const bearRect = bear.getBoundingClientRect();
+  const gameRect = gameArea.getBoundingClientRect();
+  const bearCenterX = bearRect.left - gameRect.left + bearRect.width / 2;
+  const starCenterX = x + 15;
+  const distance = bearCenterX - starCenterX;
+
+  let pullStrength = 0.05;
+  if (currentLevel >= 3) pullStrength = 0.06;
+  if (currentLevel >= 5) pullStrength = 0.075;
+  if (currentLevel >= 7) pullStrength = 0.09;
+  if (capeActive) pullStrength += 0.015;
+  if (crownActive) pullStrength += 0.015;
+  if (speedWrapActive) pullStrength += 0.02;
+
+  const pullRadius =
+    120 +
+    currentLevel * 8 +
+    (capeActive ? 18 : 0) +
+    (crownActive ? 20 : 0) +
+    (speedWrapActive ? 25 : 0);
+
+  if (Math.abs(distance) < pullRadius) {
+    x += distance * pullStrength;
+  }
+
+  return x;
 }
 
 function getBearHitbox(itemType) {
@@ -798,6 +946,7 @@ function createItem() {
     item.classList.add("star", "learningStar");
     item.innerText = "🌟";
     speed = 3;
+    dx = 0;
   } else if (itemType === "bonus") {
     item.classList.add("bonusStar");
     item.innerText = "🟣";
@@ -827,6 +976,10 @@ function createItem() {
     if (itemType !== "learning") {
       x += dx;
       if (x <= 0 || x >= gameArea.clientWidth - 40) dx *= -1;
+    }
+
+    if (itemType !== "bad" && itemType !== "heart") {
+      x = applyMagnet(x);
     }
 
     item.style.top = `${y}px`;
@@ -861,20 +1014,10 @@ function createItem() {
         return;
       }
 
-      if (itemType === "bonus") {
-        playBonusSound();
-        score += 2;
-        updateHud();
-        celebrateBear(450);
-        createSparkBurst(hitX, hitY, 7, "✨");
-        createFloatingScore("+2", hitX, hitY, "good");
-
-        if (score >= levelGoal) {
-          showLevelComplete();
-        }
-        return;
-      }
-
+if (itemType === "bonus") {
+  addPurplePower(1);
+  return;
+}
       if (itemType === "learning") {
         playStarSound();
         showBearPose("reach", 180);
@@ -908,9 +1051,15 @@ function createItem() {
 
 function resetCharacterState() {
   bearScale = 1;
+  purplePower = 0;
   correctAnswerCount = 0;
   heroFormActive = false;
-  updateBearScale();
+  magnetActive = false;
+  capeActive = false;
+  crownActive = false;
+  speedWrapActive = false;
+  clearPowerTimers();
+  updatePowerClasses();
   applyLearningProgress();
   updateHud();
 }
@@ -955,14 +1104,13 @@ function startFreshGame() {
   clearInterval(starSpawner);
   clearStars();
   clearTimeout(spriteTimeout);
+  clearPowerTimers();
 
   gameStarted = true;
   gamePaused = false;
   pendingStoryAdvance = false;
 
   startScreen.classList.add("hidden");
-  if (controlBar) controlBar.style.display = "flex";
-
   questionBox.classList.add("hidden");
   levelBox.classList.add("hidden");
   gameOverBox.classList.add("hidden");
@@ -979,8 +1127,14 @@ function startFreshGame() {
   heartCountdown = 0;
   nextHeartThreshold = 9999;
 
+  purplePower = 0;
   correctAnswerCount = 0;
   heroFormActive = false;
+  magnetActive = false;
+  capeActive = false;
+  crownActive = false;
+  speedWrapActive = false;
+  updatePowerClasses();
 
   updateLevelGoal();
   spawnRate = 920;
@@ -1086,8 +1240,19 @@ document.addEventListener("keydown", (e) => {
     nextLevel();
   }
 
+  if (key === "b") {
+    addPurplePower(1);
+    updateHud();
+    applyCharacterMode();
+  }
+
   if (key === "r") {
     resetCharacterState();
+  }
+
+  if (key === "h") {
+    heroFormActive = !heroFormActive;
+    applyLearningProgress();
   }
 
   if (key === "4") {
@@ -1105,4 +1270,3 @@ updateHud();
 updateFullscreenButton();
 applyCharacterMode();
 spawnFireflies();
-if (controlBar) controlBar.style.display = "none";

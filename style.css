@@ -129,7 +129,7 @@ h1 {
   font-weight: bold;
   font-size: 24px;
   animation: floatScoreUp 850ms ease-out forwards;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.35);
 }
 
 .floatScore.good { color: #ffe78a; }
@@ -178,7 +178,7 @@ h1 {
   height: 65%;
   background: radial-gradient(circle at 50% 32%, #25553a, #153723 72%);
   border-radius: 50% 50% 45% 45%;
-  box-shadow: inset 0 -8px 10px rgba(0, 0, 0, 0.18);
+  box-shadow: inset 0 -8px 10px rgba(0,0,0,0.18);
 }
 
 .tree1 { left: 4%; }
@@ -192,7 +192,8 @@ h1 {
   bottom: 0;
   width: 100%;
   height: 15%;
-  background: linear-gradient(180deg, var(--grass-2), var(--grass));
+  background:
+    linear-gradient(180deg, var(--grass-2), var(--grass));
   box-shadow: inset 0 8px 12px rgba(255,255,255,0.05);
   z-index: 2;
 }
@@ -438,11 +439,6 @@ h1 {
   width: min(420px, 80%);
 }
 
-.startPanel {
-  width: min(620px, 88%);
-  margin: 0 auto;
-}
-
 .introText {
   max-width: 460px;
   margin: 0 auto 16px;
@@ -493,8 +489,8 @@ h1 {
 #restartButton,
 #fullscreenButton,
 #storyButton {
-  font-size: 18px;
-  padding: 12px 18px;
+  font-size: 12px;
+  padding: 6px 10px;
   border: none;
   border-radius: 14px;
   cursor: pointer;
@@ -534,7 +530,7 @@ h1 {
 
 #controlBar {
   margin-top: 12px;
-  display: none;
+  display: flex;
   justify-content: space-between;
   gap: 14px;
   align-items: center;
@@ -572,7 +568,6 @@ h1 {
 #growthText {
   font-size: 14px;
 }
-
 #rotateNotice {
   display: none;
   position: absolute;
@@ -604,7 +599,6 @@ h1 {
   line-height: 1.5;
   opacity: 0.95;
 }
-
 .hidden {
   display: none !important;
 }
@@ -734,24 +728,6 @@ h1 {
     justify-content: center;
   }
 }
-
-@media (max-width: 900px) and (orientation: portrait) {
-  #rotateNotice {
-    display: flex;
-  }
-
-  #hudTop,
-  #hudBottom,
-  #bear,
-  .star,
-  .badStar,
-  .bonusStar,
-  .heartStar,
-  #controlBar {
-    visibility: hidden;
-  }
-}
-
 /* MOBILE LANDSCAPE GAME MODE */
 @media (max-height: 700px) and (orientation: landscape) {
   body {
@@ -839,6 +815,101 @@ h1 {
     font-size: 24px;
   }
 
+  /* Hide gameplay controls until game starts */
+  #controlBar {
+    display: none;
+  }
+
+  /* Start screen */
+  #startScreen {
+    width: min(380px, 68vw);
+    padding: 8px 10px;
+    top: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #startScreen h2 {
+    font-size: 12px;
+    margin: 0 0 4px;
+  }
+
+  #startScreen .titleGlow {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+
+  .introText {
+    font-size: 10px;
+    line-height: 1.15;
+    margin: 0 auto 4px;
+    max-width: 220px;
+  }
+
+  #playerSetup {
+    margin: 4px 0;
+  }
+
+  #playerSetup label {
+    font-size: 10px;
+  }
+
+  #playerName {
+    font-size: 11px;
+    padding: 4px 6px;
+    width: 150px;
+  }
+
+  #scoreBoard {
+    margin: 4px 0;
+    font-size: 10px;
+  }
+
+  .smallTip {
+    display: none;
+  }
+
+  #fullscreenButton {
+    display: none;
+  }
+
+  .buttonRow {
+    gap: 4px;
+  }
+
+  #startButton {
+    font-size: 10px;
+    padding: 4px 8px;
+    margin-top: 2px;
+  }
+}
+@media (max-width: 900px) and (orientation: portrait) {
+
+  #rotateNotice {
+    display: flex;
+  }
+
+  #hudTop,
+  #hudBottom,
+  #bear,
+  .star,
+  .badStar,
+  .bonusStar,
+  .heartStar,
+  #controlBar {
+    display: none;
+  }
+
+}
+/* START SCREEN PANEL */
+.startPanel {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px;
+}
+/* MOBILE LANDSCAPE START SCREEN FIX */
+@media (max-height: 700px) and (orientation: landscape) {
+
   #controlBar {
     display: none;
   }
@@ -904,4 +975,5 @@ h1 {
     padding: 4px 8px;
     margin-top: 2px;
   }
+
 }
