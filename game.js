@@ -1,7 +1,5 @@
 const gameArea = document.getElementById("gameArea");
 const bear = document.getElementById("bear");
-// Add touch-action support for mobile
-gameArea.style.touchAction = "none";
 const bearSprite = document.getElementById("bearSprite");
 
 const scoreDisplay = document.getElementById("score");
@@ -1159,18 +1157,11 @@ function startFreshGame() {
 
   starSpawner = setInterval(createItem, spawnRate);
 }
-// Replace your old mouse/touch listener with this:
-gameArea.addEventListener('pointermove', (e) => {
-    // This allows the bear to follow finger/mouse movement instantly
-    if (!gameStarted || gamePaused) return;
-    
-    const rect = gameArea.getBoundingClientRect();
-    let targetX = e.clientX - rect.left - (bear.offsetWidth / 2);
-    
-    // Boundary check to keep bear inside the game area
-    targetX = Math.max(0, Math.min(targetX, rect.width - bear.offsetWidth));
-    bear.style.left = `${targetX}px`;
-}, { passive: false });
+
+document.addEventListener("mousemove", (e) => {
+  if (!gameStarted || gamePaused) return;
+  moveBear(e.clientX);
+});
 
 gameArea.addEventListener("touchstart", (e) => {
   if (!gameStarted || gamePaused) return;
