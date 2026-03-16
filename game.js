@@ -1269,4 +1269,4 @@ updateLevelGoal();
 updateHud();
 updateFullscreenButton();
 applyCharacterMode();
-spawnFireflies();
+spawnFireflies();S
