@@ -1,7 +1,6 @@
 :root {
   --panel: rgba(10, 22, 62, 0.62);
   --panel-border: rgba(255, 255, 255, 0.08);
-  --gold: #ffd86a;
   --sky-top: #081633;
   --sky-mid: #152f69;
   --sky-bottom: #203f70;
@@ -11,9 +10,7 @@
   --bearScale: 1;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -111,17 +108,9 @@ h1 {
 }
 
 @keyframes sparkleRise {
-  0% {
-    transform: translateY(0) scale(0.7);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-34px) scale(1.2);
-    opacity: 0;
-  }
+  0% { transform: translateY(0) scale(0.7); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-34px) scale(1.2); opacity: 0; }
 }
 
 .floatScore {
@@ -131,23 +120,14 @@ h1 {
   animation: floatScoreUp 850ms ease-out forwards;
   text-shadow: 0 2px 10px rgba(0,0,0,0.35);
 }
-
 .floatScore.good { color: #ffe78a; }
 .floatScore.bad { color: #ff8585; }
 .floatScore.heart { color: #ffb4c2; }
 
 @keyframes floatScoreUp {
-  0% {
-    transform: translateY(0px) scale(0.85);
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-38px) scale(1.1);
-    opacity: 0;
-  }
+  0% { transform: translateY(0px) scale(0.85); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-38px) scale(1.1); opacity: 0; }
 }
 
 .tree {
@@ -157,7 +137,6 @@ h1 {
   height: 34%;
   z-index: 2;
 }
-
 .tree::before {
   content: "";
   position: absolute;
@@ -168,7 +147,6 @@ h1 {
   background: #4c2d1e;
   border-radius: 5px;
 }
-
 .tree::after {
   content: "";
   position: absolute;
@@ -180,7 +158,6 @@ h1 {
   border-radius: 50% 50% 45% 45%;
   box-shadow: inset 0 -8px 10px rgba(0,0,0,0.18);
 }
-
 .tree1 { left: 4%; }
 .tree2 { left: 15%; bottom: 11%; transform: scale(1.05); }
 .tree3 { right: 14%; bottom: 12%; }
@@ -192,8 +169,7 @@ h1 {
   bottom: 0;
   width: 100%;
   height: 15%;
-  background:
-    linear-gradient(180deg, var(--grass-2), var(--grass));
+  background: linear-gradient(180deg, var(--grass-2), var(--grass));
   box-shadow: inset 0 8px 12px rgba(255,255,255,0.05);
   z-index: 2;
 }
@@ -219,10 +195,7 @@ h1 {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }
-
-.hudCard.wide {
-  min-width: 160px;
-}
+.hudCard.wide { min-width: 160px; }
 
 .hudLabel,
 .miniLabel {
@@ -232,7 +205,6 @@ h1 {
   text-transform: uppercase;
   opacity: 0.8;
 }
-
 .hudValue {
   font-size: clamp(20px, 2vw, 28px);
   font-weight: bold;
@@ -250,7 +222,6 @@ h1 {
   z-index: 30;
   gap: 14px;
 }
-
 .hudBottomLeft,
 .hudBottomRight {
   background: var(--panel);
@@ -262,11 +233,7 @@ h1 {
   -webkit-backdrop-filter: blur(5px);
   font-size: 14px;
 }
-
-.divider {
-  opacity: 0.5;
-  padding: 0 5px;
-}
+.divider { opacity: 0.5; padding: 0 5px; }
 
 #bear {
   position: absolute;
@@ -301,10 +268,7 @@ h1 {
   width: 155px;
 }
 
-#bear.running {
-  animation: bounce 0.20s infinite alternate ease-in-out;
-}
-
+#bear.running { animation: bounce 0.20s infinite alternate ease-in-out; }
 @keyframes bounce {
   from { transform: translateY(0px) scale(var(--bearScale)); }
   to { transform: translateY(-7px) scale(var(--bearScale)); }
@@ -317,10 +281,7 @@ h1 {
     drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22));
 }
 
-#bear.heroPulse {
-  animation: heroPulse 650ms ease-out;
-}
-
+#bear.heroPulse { animation: heroPulse 650ms ease-out; }
 @keyframes heroPulse {
   0% { transform: scale(calc(var(--bearScale) * 0.92)); }
   45% { transform: scale(calc(var(--bearScale) * 1.14)); }
@@ -341,12 +302,10 @@ h1 {
   transform-origin: top center;
   animation: capeFlap 0.35s infinite alternate ease-in-out;
 }
-
 @keyframes capeFlap {
   from { transform: translateX(-50%) rotate(8deg); }
   to { transform: translateX(-50%) rotate(-8deg); }
 }
-
 #bear.crownOn::after {
   content: "👑";
   position: absolute;
@@ -358,25 +317,20 @@ h1 {
   pointer-events: none;
   animation: crownFloat 1.2s ease-in-out infinite alternate;
 }
-
 @keyframes crownFloat {
   from { transform: translateX(-50%) translateY(0px); }
   to { transform: translateX(-50%) translateY(-4px); }
 }
-
 #bear.speedOn #bearSprite {
   filter:
     drop-shadow(0 0 10px rgba(127, 228, 255, 0.95))
     drop-shadow(0 0 24px rgba(127, 228, 255, 0.42))
     drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22));
 }
-
 #bear.builtInPowerArt.capeOn::before,
 #bear.builtInPowerArt.crownOn::after,
 #bear.foxMode.capeOn::before,
-#bear.foxMode.crownOn::after {
-  display: none !important;
-}
+#bear.foxMode.crownOn::after { display: none !important; }
 
 .star,
 .badStar,
@@ -388,27 +342,11 @@ h1 {
   z-index: 12;
   filter: drop-shadow(0 0 10px rgba(255,255,255,0.16));
 }
-
-.star {
-  animation: starTwinkle 1.4s ease-in-out infinite alternate;
-}
-
-.learningStar {
-  filter: drop-shadow(0 0 10px rgba(255, 218, 70, 0.8));
-}
-
-.badStar {
-  filter: drop-shadow(0 0 12px rgba(255, 65, 65, 0.8));
-}
-
-.bonusStar {
-  filter: drop-shadow(0 0 12px rgba(190, 100, 255, 0.8));
-}
-
-.heartStar {
-  filter: drop-shadow(0 0 12px rgba(255, 95, 135, 0.9));
-}
-
+.star { animation: starTwinkle 1.4s ease-in-out infinite alternate; }
+.learningStar { filter: drop-shadow(0 0 10px rgba(255, 218, 70, 0.8)); }
+.badStar { filter: drop-shadow(0 0 12px rgba(255, 65, 65, 0.8)); }
+.bonusStar { filter: drop-shadow(0 0 12px rgba(190, 100, 255, 0.8)); }
+.heartStar { filter: drop-shadow(0 0 12px rgba(255, 95, 135, 0.9)); }
 @keyframes starTwinkle {
   from { transform: scale(0.95) rotate(-3deg); }
   to { transform: scale(1.06) rotate(3deg); }
@@ -429,14 +367,15 @@ h1 {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-
 .overlayBox h2 {
   margin-top: 0;
   font-size: clamp(24px, 2.5vw, 34px);
 }
+.smallOverlay { width: min(420px, 80%); }
 
-.smallOverlay {
-  width: min(420px, 80%);
+.startPanel {
+  width: min(620px, 88%);
+  margin: 0 auto;
 }
 
 .introText {
@@ -445,22 +384,17 @@ h1 {
   line-height: 1.5;
   opacity: 0.95;
 }
-
 .titleGlow {
   font-size: 28px;
   margin-bottom: 4px;
   animation: titleBlink 1.5s ease-in-out infinite alternate;
 }
-
 @keyframes titleBlink {
   from { transform: scale(0.95); opacity: 0.7; }
   to { transform: scale(1.08); opacity: 1; }
 }
 
-#playerSetup {
-  margin: 14px 0;
-}
-
+#playerSetup { margin: 14px 0; }
 #playerName {
   font-size: 16px;
   padding: 10px 12px;
@@ -469,18 +403,8 @@ h1 {
   margin-left: 8px;
   width: min(240px, 70%);
 }
-
-#scoreBoard {
-  margin: 14px 0;
-  opacity: 0.96;
-}
-
-.buttonRow {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
+#scoreBoard { margin: 14px 0; opacity: 0.96; }
+.buttonRow { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
 #startButton,
 .answerBtn,
@@ -489,8 +413,8 @@ h1 {
 #restartButton,
 #fullscreenButton,
 #storyButton {
-  font-size: 12px;
-  padding: 6px 10px;
+  font-size: 18px;
+  padding: 12px 18px;
   border: none;
   border-radius: 14px;
   cursor: pointer;
@@ -500,43 +424,26 @@ h1 {
   color: #1e1b0f;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.22);
 }
-
-.answerBtn {
-  min-width: 110px;
-}
-
+.answerBtn { min-width: 110px; }
 #pauseButton {
   background: linear-gradient(180deg, #d4e7ff, #8ebeff);
   color: #102244;
 }
-
 #fullscreenButton {
   background: linear-gradient(180deg, #c8ffd2, #65d27a);
   color: #102314;
 }
-
-#answerButtons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.smallTip {
-  margin-top: 14px;
-  font-size: 13px;
-  opacity: 0.8;
-}
+#answerButtons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.smallTip { margin-top: 14px; font-size: 13px; opacity: 0.8; }
 
 #controlBar {
   margin-top: 12px;
-  display: flex;
+  display: none;
   justify-content: space-between;
   gap: 14px;
   align-items: center;
   flex-wrap: wrap;
 }
-
 #growthMeterWrap {
   flex: 1;
   min-width: 240px;
@@ -546,7 +453,6 @@ h1 {
   padding: 12px 14px;
   box-shadow: var(--ui-shadow);
 }
-
 #growthMeter {
   width: 100%;
   height: 14px;
@@ -555,7 +461,6 @@ h1 {
   background: rgba(255, 255, 255, 0.12);
   margin: 6px 0 4px;
 }
-
 #growthFill {
   width: 0%;
   height: 100%;
@@ -564,10 +469,8 @@ h1 {
   box-shadow: 0 0 14px rgba(255, 199, 69, 0.45);
   transition: width 220ms ease;
 }
+#growthText { font-size: 14px; }
 
-#growthText {
-  font-size: 14px;
-}
 #rotateNotice {
   display: none;
   position: absolute;
@@ -579,7 +482,6 @@ h1 {
   padding: 20px;
   text-align: center;
 }
-
 .rotateBox {
   width: min(90%, 360px);
   background: linear-gradient(180deg, rgba(23, 45, 98, 0.96), rgba(13, 28, 68, 0.98));
@@ -588,45 +490,27 @@ h1 {
   padding: 22px;
   box-shadow: 0 20px 46px rgba(0, 0, 0, 0.42);
 }
+.rotateBox h2 { margin-top: 0; margin-bottom: 10px; }
+.rotateBox p { margin: 0; line-height: 1.5; opacity: 0.95; }
 
-.rotateBox h2 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.rotateBox p {
-  margin: 0;
-  line-height: 1.5;
-  opacity: 0.95;
-}
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
 #flashOverlay {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0));
+  background: radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0));
   opacity: 0;
   pointer-events: none;
   z-index: 55;
 }
-
-#flashOverlay.flash {
-  animation: flashPulse 600ms ease-out;
-}
-
+#flashOverlay.flash { animation: flashPulse 600ms ease-out; }
 @keyframes flashPulse {
   0% { opacity: 0; }
   18% { opacity: 1; }
   100% { opacity: 0; }
 }
 
-.shake {
-  animation: screenShake 240ms linear;
-}
-
+.shake { animation: screenShake 240ms linear; }
 @keyframes screenShake {
   0% { transform: translateX(0px); }
   20% { transform: translateX(-7px); }
@@ -637,76 +521,29 @@ h1 {
 }
 
 @media (max-width: 900px) {
-  .star,
-  .badStar,
-  .bonusStar,
-  .heartStar {
-    font-size: 30px;
-  }
-
-  #hudBottom {
-    bottom: 12px;
-  }
-
-  .hudBottomLeft,
-  .hudBottomRight {
-    font-size: 12px;
-  }
+  .star, .badStar, .bonusStar, .heartStar { font-size: 30px; }
+  #hudBottom { bottom: 12px; }
+  .hudBottomLeft, .hudBottomRight { font-size: 12px; }
 }
 
 @media (max-width: 640px) {
-  body {
-    padding: 6px;
-  }
-
-  #hudTop {
-    gap: 6px;
-  }
-
-  .hudCard {
-    min-width: 72px;
-    padding: 8px 10px;
-    border-radius: 14px;
-  }
-
-  .hudCard.wide {
-    min-width: 112px;
-  }
-
-  .hudLabel {
-    font-size: 10px;
-  }
-
-  .hudValue {
-    font-size: 16px;
-  }
-
+  body { padding: 6px; }
+  #hudTop { gap: 6px; }
+  .hudCard { min-width: 72px; padding: 8px 10px; border-radius: 14px; }
+  .hudCard.wide { min-width: 112px; }
+  .hudLabel { font-size: 10px; }
+  .hudValue { font-size: 16px; }
   #hudBottom {
-    left: 10px;
-    right: 10px;
-    gap: 8px;
-    flex-direction: column;
-    align-items: stretch;
+    left: 10px; right: 10px; gap: 8px;
+    flex-direction: column; align-items: stretch;
   }
-
-  #bear {
-    width: 96px;
-    height: 124px;
-  }
-
+  #bear { width: 96px; height: 124px; }
   #bearSprite,
   #bear.foxMode #bearSprite,
   #bear.foxMode.builtInPowerArt #bearSprite {
-    width: 138px;
-    left: -12px;
-    bottom: -10px;
+    width: 138px; left: -12px; bottom: -10px;
   }
-
-  .overlayBox {
-    width: min(92%, 430px);
-    padding: 18px;
-  }
-
+  .overlayBox { width: min(92%, 430px); padding: 18px; }
   #startButton,
   .answerBtn,
   #pauseButton,
@@ -717,18 +554,24 @@ h1 {
     font-size: 16px;
     padding: 10px 14px;
   }
+  #playerName { width: 100%; margin-left: 0; margin-top: 8px; }
+  #controlBar { justify-content: center; }
+}
 
-  #playerName {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 8px;
-  }
-
+@media (max-width: 900px) and (orientation: portrait) {
+  #rotateNotice { display: flex; }
+  #hudTop,
+  #hudBottom,
+  #bear,
+  .star,
+  .badStar,
+  .bonusStar,
+  .heartStar,
   #controlBar {
-    justify-content: center;
+    visibility: hidden;
   }
 }
-/* MOBILE LANDSCAPE GAME MODE */
+
 @media (max-height: 700px) and (orientation: landscape) {
   body {
     padding: 0;
@@ -745,48 +588,29 @@ h1 {
   #gameShell {
     width: 100vw;
     height: 100dvh;
-    margin: 0 auto;
   }
 
   #gameArea {
-    border-radius: 12px;
     width: 100%;
     max-height: 64dvh;
+    border-radius: 12px;
   }
 
   #hudTop {
-    top: 6px;
-    left: 6px;
-    right: 6px;
-    gap: 6px;
+    top: 6px; left: 6px; right: 6px; gap: 6px;
   }
-
   .hudCard {
     min-width: 60px;
     padding: 6px 8px;
     border-radius: 12px;
   }
-
-  .hudCard.wide {
-    min-width: 92px;
-  }
-
-  .hudLabel {
-    font-size: 9px;
-  }
-
-  .hudValue {
-    font-size: 14px;
-    margin-top: 2px;
-  }
+  .hudCard.wide { min-width: 92px; }
+  .hudLabel { font-size: 9px; }
+  .hudValue { font-size: 14px; margin-top: 2px; }
 
   #hudBottom {
-    left: 8px;
-    right: 8px;
-    bottom: 6px;
-    gap: 6px;
+    left: 8px; right: 8px; bottom: 6px; gap: 6px;
   }
-
   .hudBottomLeft,
   .hudBottomRight {
     padding: 6px 8px;
@@ -799,7 +623,6 @@ h1 {
     height: 104px;
     bottom: 2%;
   }
-
   #bearSprite,
   #bear.foxMode #bearSprite,
   #bear.foxMode.builtInPowerArt #bearSprite {
@@ -811,108 +634,9 @@ h1 {
   .star,
   .badStar,
   .bonusStar,
-  .heartStar {
-    font-size: 24px;
-  }
+  .heartStar { font-size: 24px; }
 
-  /* Hide gameplay controls until game starts */
-  #controlBar {
-    display: none;
-  }
-
-  /* Start screen */
-  #startScreen {
-    width: min(380px, 68vw);
-    padding: 8px 10px;
-    top: 2%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  #startScreen h2 {
-    font-size: 12px;
-    margin: 0 0 4px;
-  }
-
-  #startScreen .titleGlow {
-    font-size: 16px;
-    margin-bottom: 2px;
-  }
-
-  .introText {
-    font-size: 10px;
-    line-height: 1.15;
-    margin: 0 auto 4px;
-    max-width: 220px;
-  }
-
-  #playerSetup {
-    margin: 4px 0;
-  }
-
-  #playerSetup label {
-    font-size: 10px;
-  }
-
-  #playerName {
-    font-size: 11px;
-    padding: 4px 6px;
-    width: 150px;
-  }
-
-  #scoreBoard {
-    margin: 4px 0;
-    font-size: 10px;
-  }
-
-  .smallTip {
-    display: none;
-  }
-
-  #fullscreenButton {
-    display: none;
-  }
-
-  .buttonRow {
-    gap: 4px;
-  }
-
-  #startButton {
-    font-size: 10px;
-    padding: 4px 8px;
-    margin-top: 2px;
-  }
-}
-@media (max-width: 900px) and (orientation: portrait) {
-
-  #rotateNotice {
-    display: flex;
-  }
-
-  #hudTop,
-  #hudBottom,
-  #bear,
-  .star,
-  .badStar,
-  .bonusStar,
-  .heartStar,
-  #controlBar {
-    display: none;
-  }
-
-}
-/* START SCREEN PANEL */
-.startPanel {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 20px;
-}
-/* MOBILE LANDSCAPE START SCREEN FIX */
-@media (max-height: 700px) and (orientation: landscape) {
-
-  #controlBar {
-    display: none;
-  }
+  #controlBar { display: none; }
 
   #startScreen {
     width: min(380px, 68vw);
@@ -921,59 +645,42 @@ h1 {
     left: 50%;
     transform: translateX(-50%);
   }
-
+  .startPanel {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
   #startScreen h2 {
     font-size: 12px;
     margin: 0 0 4px;
   }
-
   #startScreen .titleGlow {
     font-size: 16px;
     margin-bottom: 2px;
   }
-
   .introText {
     font-size: 10px;
     line-height: 1.15;
     margin: 0 auto 4px;
     max-width: 220px;
   }
-
-  #playerSetup {
-    margin: 4px 0;
-  }
-
-  #playerSetup label {
-    font-size: 10px;
-  }
-
+  #playerSetup { margin: 4px 0; }
+  #playerSetup label { font-size: 10px; }
   #playerName {
     font-size: 11px;
     padding: 4px 6px;
     width: 150px;
   }
-
   #scoreBoard {
     margin: 4px 0;
     font-size: 10px;
   }
-
-  .smallTip {
-    display: none;
-  }
-
-  #fullscreenButton {
-    display: none;
-  }
-
-  .buttonRow {
-    gap: 4px;
-  }
-
+  .smallTip { display: none; }
+  #fullscreenButton { display: none; }
+  .buttonRow { gap: 4px; }
   #startButton {
     font-size: 10px;
     padding: 4px 8px;
     margin-top: 2px;
   }
-
 }
