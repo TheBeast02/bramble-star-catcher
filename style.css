@@ -730,80 +730,30 @@ h1 {
 }
 /* MOBILE LANDSCAPE GAME MODE */
 @media (max-height: 700px) and (orientation: landscape) {
+  body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+  }
 
-body {
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-h1 {
-  margin: 2px 0 4px;
-  font-size: 18px;
-  line-height: 1.1;
-}
-#gameShell {
-  width: 100vw;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-#gameArea {
-  border-radius: 12px;
-  width: 100%;
-  max-height: 64dvh;
-}
-#startScreen {
-  padding: 8px 12px;
-  width: min(74%, 480px);
-  top: 2%;
-}
+  h1 {
+    margin: 2px 0 4px;
+    font-size: 18px;
+    line-height: 1.1;
+  }
 
-#startScreen h2 {
-  font-size: 14px;
-  margin: 0 0 4px;
-}
+  #gameShell {
+    width: 100vw;
+    height: 100dvh;
+    margin: 0 auto;
+  }
 
-.introText {
-  font-size: 11px;
-  line-height: 1.2;
-  margin: 0 auto 6px;
-  max-width: 300px;
-}
+  #gameArea {
+    border-radius: 12px;
+    width: 100%;
+    max-height: 64dvh;
+  }
 
-#playerSetup {
-  margin: 4px 0;
-}
-
-#playerSetup label {
-  font-size: 12px;
-}
-
-#playerName {
-  font-size: 13px;
-  padding: 6px 8px;
-  width: min(200px, 66%);
-}
-
-#scoreBoard {
-  margin: 6px 0;
-  font-size: 11px;
-}
-
-.buttonRow {
-  gap: 6px;
-}
-
-#startButton,
-#fullscreenButton {
-  font-size: 11px;
-  padding: 5px 8px;
-  margin-top: 2px;
-}
-
-.smallTip {
-  display: none;
-}
   #hudTop {
     top: 6px;
     left: 6px;
@@ -865,81 +815,73 @@ h1 {
     font-size: 24px;
   }
 
-  .overlayBox {
-    width: min(90%, 360px);
-    padding: 14px;
-    top: 4%;
+  /* Hide gameplay controls until game starts */
+  #controlBar {
+    display: none;
   }
 
-  .overlayBox h2 {
-    font-size: 20px;
-  }
-
-  #startButton,
-  .answerBtn,
-  #pauseButton,
-  #nextLevelButton,
-  #restartButton,
-  #fullscreenButton,
-  #storyButton {
-    font-size: 14px;
-    padding: 8px 12px;
-  }
-
-#controlBar {
-  margin-top: 4px;
-  gap: 6px;
-  flex-wrap: nowrap;
-  align-items: center;
-}
-#pauseButton {
-  font-size: 13px;
-  padding: 8px 10px;
-  margin-top: 0;
-}
-#growthMeterWrap {
-  min-width: 140px;
-  padding: 6px 8px;
-}
-  #growthText {
-    font-size: 12px;
-  }
+  /* Start screen */
   #startScreen {
-  padding: 10px 14px;
-  width: min(78%, 520px);
-  top: 3%;
-}
+    width: min(380px, 68vw);
+    padding: 8px 10px;
+    top: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 
-#startScreen h2 {
-  font-size: 16px;
-  margin: 0 0 6px;
-}
+  #startScreen h2 {
+    font-size: 12px;
+    margin: 0 0 4px;
+  }
 
-.introText {
-  font-size: 12px;
-  line-height: 1.3;
-  margin: 0 auto 8px;
-  max-width: 320px;
-}
+  #startScreen .titleGlow {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
 
-#playerSetup {
-  margin: 6px 0;
-}
+  .introText {
+    font-size: 10px;
+    line-height: 1.15;
+    margin: 0 auto 4px;
+    max-width: 220px;
+  }
 
-#playerName {
-  font-size: 14px;
-  padding: 8px 10px;
-  width: min(220px, 70%);
-}
+  #playerSetup {
+    margin: 4px 0;
+  }
 
-#scoreBoard {
-  margin: 8px 0;
-  font-size: 12px;
-}
+  #playerSetup label {
+    font-size: 10px;
+  }
 
-.smallTip {
-  display: none;
-}
+  #playerName {
+    font-size: 11px;
+    padding: 4px 6px;
+    width: 150px;
+  }
+
+  #scoreBoard {
+    margin: 4px 0;
+    font-size: 10px;
+  }
+
+  .smallTip {
+    display: none;
+  }
+
+  #fullscreenButton {
+    display: none;
+  }
+
+  .buttonRow {
+    gap: 4px;
+  }
+
+  #startButton {
+    font-size: 10px;
+    padding: 4px 8px;
+    margin-top: 2px;
+  }
 }
 @media (max-width: 900px) and (orientation: portrait) {
 
