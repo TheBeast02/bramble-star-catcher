@@ -302,6 +302,12 @@ h1 {
   filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22));
 }
 
+#bearSprite.spriteFallback {
+  min-height: 54px;
+  outline: 2px dashed rgba(255, 216, 106, 0.9);
+  background: rgba(255, 216, 106, 0.12);
+}
+
 #bear.foxMode #bearSprite,
 #bear.foxMode.builtInPowerArt #bearSprite {
   left: -10px;
@@ -1012,6 +1018,17 @@ const gameArea = document.getElementById("gameArea");
 const bear = document.getElementById("bear");
 const bearSprite = document.getElementById("bearSprite");
 
+// When this single HTML file is previewed without its image folder, make the
+// real sprite box visible so left/right boundary testing is still accurate.
+if (bearSprite) {
+  const updateSpriteFallback = () => {
+    bearSprite.classList.toggle("spriteFallback", !bearSprite.naturalWidth);
+  };
+  bearSprite.addEventListener("load", updateSpriteFallback);
+  bearSprite.addEventListener("error", updateSpriteFallback);
+  if (bearSprite.complete) updateSpriteFallback();
+}
+
 const scoreDisplay = document.getElementById("score");
 const sizeText = document.getElementById("sizeText");
 const levelText = document.getElementById("levelText");
@@ -1524,12 +1541,12 @@ function applyLearningProgress() {
 
 function moveBear(clientX) {
   const rect = gameArea.getBoundingClientRect();
-  const styleWidth = parseFloat(getComputedStyle(bear).width) || bear.offsetWidth || 110;
-  const scale = bearScale || 1;
-  const effectiveBearWidth = styleWidth * scale;
+  const visual = getBearVisualMetrics();
 
-  let targetX = clientX - rect.left - effectiveBearWidth / 2;
-  const bounds = getPlayBounds(effectiveBearWidth);
+  // Position by the visible artwork's center, then clamp by the artwork's
+  // actual left/right edges. This stays symmetric even when Bramble grows.
+  let targetX = clientX - rect.left - visual.centerOffset;
+  const bounds = getBearPlayBounds(visual);
   const minX = bounds.min;
   const maxX = bounds.max;
 
@@ -1540,9 +1557,9 @@ function moveBear(clientX) {
 
   if (speedWrapActive) {
     const edgeZone = 14;
-    if (targetX <= minX && lastMoveDirection < 0 && clientX <= rect.left + minX + edgeZone) {
+    if (targetX <= minX && lastMoveDirection < 0 && clientX <= rect.left + edgeZone) {
       bearX = maxX;
-    } else if (targetX >= maxX && lastMoveDirection > 0 && clientX >= rect.left + maxX + effectiveBearWidth - edgeZone) {
+    } else if (targetX >= maxX && lastMoveDirection > 0 && clientX >= rect.right - edgeZone) {
       bearX = minX;
     } else {
       if (targetX < minX) targetX = minX;
@@ -2288,16 +2305,43 @@ updateFullscreenButton();
 applyCharacterMode();
 spawnFireflies();
 
-// Screen-fit revision 2: follow browser toolbars and rotation automatically.
+// Screen-fit revision 4: symmetric visible-art bounds on both edges.
 function fitScaleForHeight(height, compact) {
   return compact ? Math.max(0.35, Math.min(1, height / 520)) : 1;
 }
 
+// Generic bounds for falling items. Gameplay uses the full playfield width;
+// safe-area insets belong to the HUD/controls, not the game physics.
 function getPlayBounds(width) {
-  const style = getComputedStyle(gameArea);
-  const left = parseFloat(style.getPropertyValue('--play-safe-left')) || 0;
-  const right = parseFloat(style.getPropertyValue('--play-safe-right')) || 0;
-  return { min: left, max: Math.max(left, gameArea.clientWidth - right - width) };
+  return { min: 0, max: Math.max(0, gameArea.clientWidth - width) };
+}
+
+function getBearVisualMetrics() {
+  const bearStyle = getComputedStyle(bear);
+  const spriteStyle = bearSprite ? getComputedStyle(bearSprite) : null;
+  const baseWidth = parseFloat(bearStyle.width) || bear.offsetWidth || 96;
+  const scale = bearScale || 1;
+  const originX = baseWidth / 2;
+
+  // The artwork intentionally overhangs the #bear box. Include that overhang
+  // and the center-origin transform so the visible image, not an invisible
+  // wrapper, is what reaches both edges.
+  const spriteLeft = spriteStyle ? (parseFloat(spriteStyle.left) || 0) : 0;
+  const spriteWidth = spriteStyle ? (parseFloat(spriteStyle.width) || bearSprite.offsetWidth || baseWidth) : baseWidth;
+  const leftOffset = originX + (spriteLeft - originX) * scale;
+  const rightOffset = originX + (spriteLeft + spriteWidth - originX) * scale;
+
+  return {
+    leftOffset,
+    rightOffset,
+    centerOffset: (leftOffset + rightOffset) / 2
+  };
+}
+
+function getBearPlayBounds(visual = getBearVisualMetrics()) {
+  const min = -visual.leftOffset;
+  const max = gameArea.clientWidth - visual.rightOffset;
+  return { min, max: Math.max(min, max) };
 }
 
 function fitCharacterToArea() {
@@ -2311,7 +2355,7 @@ function fitCharacterToArea() {
     gameArea.style.setProperty('--fit-sprite-offset', `${-10 * next}px`);
     gameArea.style.setProperty('--fit-star-size', `${Math.max(22, 30 * next)}px`);
   }
-  const bounds = getPlayBounds(bear.offsetWidth * (bearScale || 1));
+  const bounds = getBearPlayBounds();
   bearX = Math.max(bounds.min, Math.min(bear.offsetLeft, bounds.max));
   bear.style.left = `${bearX}px`;
 }
