@@ -877,6 +877,48 @@ body { background-color: #081633; }
   }
 }
 
+/* Screen-fit revision 5: faster kid-friendly progression + full-viewport play mode. */
+.heroPellet {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fffbd1 0 18%, #ffe46a 22%, #ffc126 55%, #ff8a00 100%);
+  border: 2px solid rgba(255,255,255,0.88);
+  box-shadow: 0 0 10px rgba(255, 221, 70, 0.95), 0 0 24px rgba(255, 169, 0, 0.72);
+  z-index: 13;
+  animation: heroPelletPulse 0.65s ease-in-out infinite alternate;
+}
+@keyframes heroPelletPulse {
+  from { transform: scale(0.90); filter: brightness(1); }
+  to { transform: scale(1.12); filter: brightness(1.25); }
+}
+
+@media (max-width: 1100px), (max-height: 600px), (pointer: coarse) {
+  body.gameplayMode {
+    padding: 0 !important;
+    margin: 0;
+    overflow: hidden;
+    height: var(--visible-height, 100dvh);
+    min-height: 0;
+    background: #081633;
+  }
+  body.gameplayMode > h1 { display: none !important; }
+  body.gameplayMode #gameShell {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    max-width: none;
+    height: var(--visible-height, 100dvh);
+    margin: 0;
+    background: #081633;
+  }
+  body.gameplayMode #gameArea {
+    border-radius: 0;
+    border: 0;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1162,6 +1204,8 @@ let bonusCountdown = 0;
 let dangerCountdown = 0;
 let heartCountdown = 0;
 let nextHeartThreshold = 26;
+let heroPelletCountdown = 0;
+let nextHeroPelletThreshold = 18;
 
 let bearScale = 1;
 let layoutScale = 1;
@@ -1175,8 +1219,8 @@ let poweredTimeout = null;
 
 let purplePower = 0;
 let correctAnswerCount = 0;
-const ANSWERS_TO_HERO = 6;
-const GROWTH_STEPS = [1.00, 1.08, 1.16, 1.24, 1.32, 1.42];
+const ANSWERS_TO_HERO = 4;
+const GROWTH_STEPS = [1.00, 1.15, 1.30, 1.45];
 
 let heroFormActive = false;
 let magnetActive = false;
@@ -1202,7 +1246,7 @@ let lastMoveDirection = 0;
 
 let pendingStoryAdvance = false;
 
-const levelGoals = [18, 26, 38, 52, 68, 86, 106, 128, 152];
+const levelGoals = [12, 18, 28, 40, 54, 70, 88, 108, 130];
 
 const questionSets = {
   easy: [
@@ -1236,7 +1280,7 @@ function randomInt(min, max) {
 }
 
 function isFoxLevel() {
-  return currentLevel >= 4 && currentLevel <= 6;
+  return currentLevel >= 3 && currentLevel <= 5;
 }
 
 function getSpriteMap() {
@@ -1505,6 +1549,28 @@ function addPurplePower(amount = 1) {
     showLevelComplete();
   }
 }
+function activateHeroPellet() {
+  const wasHero = heroFormActive;
+  correctAnswerCount = ANSWERS_TO_HERO;
+  applyLearningProgress();
+
+  score += 3;
+  updateHud();
+
+  const rect = bear.getBoundingClientRect();
+  const areaRect = gameArea.getBoundingClientRect();
+  const cx = rect.left - areaRect.left + rect.width / 2;
+  const cy = rect.top - areaRect.top + rect.height / 2;
+
+  createSparkBurst(cx, cy, 12, "⚡");
+  createFloatingScore(wasHero ? "+3" : "HERO!", cx - 18, cy - 12, "good");
+  celebrateBear(900);
+
+  if (score >= levelGoal) {
+    showLevelComplete();
+  }
+}
+
 function applyLearningProgress() {
   const becameHero = !heroFormActive && correctAnswerCount >= ANSWERS_TO_HERO;
 
@@ -1649,7 +1715,7 @@ async function toggleFullscreen() {
 }
 
 function clearStars() {
-  document.querySelectorAll(".star, .badStar, .bonusStar, .heartStar").forEach(item => item.remove());
+  document.querySelectorAll(".star, .badStar, .bonusStar, .heartStar, .heroPellet").forEach(item => item.remove());
 }
 
 function pauseGame() {
@@ -1667,14 +1733,14 @@ function pauseGame() {
 }
 
 function getStoryForLevel(level) {
-  if (level === 4) {
+  if (level === 3) {
     return {
       title: "A New Friend Appears",
       text: "Bramble reaches deeper into the forest and meets a clever fox. The adventure changes, and the forest feels faster now."
     };
   }
 
-  if (level === 7) {
+  if (level === 6) {
     return {
       title: "Return of the Bear Hero",
       text: "Bramble returns stronger than before, carrying everything learned in the glowing woods."
@@ -1845,9 +1911,11 @@ function nextLevel() {
   bonusCountdown = 0;
   dangerCountdown = 0;
   heartCountdown = 0;
+  heroPelletCountdown = 0;
+  nextHeroPelletThreshold = randomInt(16, 22);
   nextHeartThreshold = currentLevel < 3 ? 9999 : randomInt(22, 32);
 
-  if (currentLevel === 4 || currentLevel === 7) {
+  if (currentLevel === 3 || currentLevel === 6) {
     bearScale = 1;
     purplePower = 0;
     correctAnswerCount = 0;
@@ -1946,12 +2014,17 @@ function createItem() {
   bonusCountdown++;
   dangerCountdown++;
   heartCountdown++;
+  heroPelletCountdown++;
 
   if (currentLevel >= 3 && heartCountdown >= nextHeartThreshold) {
     itemType = "heart";
     heartCountdown = 0;
     nextHeartThreshold = randomInt(22, 32);
-  } else if (learningCountdown >= 9) {
+  } else if (heroPelletCountdown >= nextHeroPelletThreshold) {
+    itemType = "hero";
+    heroPelletCountdown = 0;
+    nextHeroPelletThreshold = randomInt(16, 22);
+  } else if (learningCountdown >= 6) {
     itemType = "learning";
     learningCountdown = 0;
   } else if (bonusCountdown >= 7) {
@@ -1974,6 +2047,11 @@ function createItem() {
     item.innerText = "❤️";
     speed = 2.9;
     dx = Math.random() > 0.5 ? 0.8 : -0.8;
+  } else if (itemType === "hero") {
+    item.classList.add("heroPellet");
+    item.setAttribute("aria-label", "Hero pellet");
+    speed = 2.7;
+    dx = Math.random() > 0.5 ? 0.9 : -0.9;
   } else if (itemType === "learning") {
     item.classList.add("star", "learningStar");
     item.innerText = "🌟";
@@ -2045,6 +2123,12 @@ function createItem() {
       if (itemType === "heart") {
         createSparkBurst(hitX, hitY, 5, "💖");
         awardHeart();
+        return;
+      }
+
+      if (itemType === "hero") {
+        createSparkBurst(hitX, hitY, 8, "⚡");
+        activateHeroPellet();
         return;
       }
 
@@ -2144,6 +2228,15 @@ function startFreshGame() {
   gamePaused = false;
   pendingStoryAdvance = false;
 
+  // Gameplay mode immediately uses the entire available phone viewport.
+  // Browsers that support true fullscreen may enter it from this same tap;
+  // iPhone Safari still controls its own browser chrome, so CSS is the fallback.
+  document.body.classList.add("gameplayMode");
+  scheduleScreenFit();
+  if (window.matchMedia("(pointer: coarse)").matches && !isFullscreenActive()) {
+    enterFullscreen().catch(() => {});
+  }
+
   startScreen.classList.add("hidden");
   questionBox.classList.add("hidden");
   levelBox.classList.add("hidden");
@@ -2159,6 +2252,8 @@ function startFreshGame() {
   bonusCountdown = 0;
   dangerCountdown = 0;
   heartCountdown = 0;
+  heroPelletCountdown = 0;
+  nextHeroPelletThreshold = randomInt(16, 22);
   nextHeartThreshold = 9999;
 
   purplePower = 0;
@@ -2305,7 +2400,7 @@ updateFullscreenButton();
 applyCharacterMode();
 spawnFireflies();
 
-// Screen-fit revision 4: symmetric visible-art bounds on both edges.
+// Screen-fit revision 5: full-viewport play, faster growth, earlier fox, hero pellet.
 function fitScaleForHeight(height, compact) {
   return compact ? Math.max(0.35, Math.min(1, height / 520)) : 1;
 }
