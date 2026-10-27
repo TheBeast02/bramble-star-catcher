@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#081633">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=1">
+  <title>Bramble the Bear: Star Catcher Deluxe</title>
+<style>
+:root {
+  --panel: rgba(10, 22, 62, 0.62);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --gold: #ffd86a;
+  --sky-top: #081633;
+  --sky-mid: #152f69;
+  --sky-bottom: #203f70;
+  --grass: #244b29;
+  --grass-2: #2f6036;
+  --ui-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  --bearScale: 1;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: white;
+  background: radial-gradient(circle at top, rgba(77, 127, 255, 0.15), transparent 25%), linear-gradient(180deg, #06122a, #0c1e44 45%, #112655 100%);
+}
+h1 { margin: 6px 0 12px; font-size: clamp(24px, 3vw, 40px); text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35); }
+#gameShell { width: min(1180px, 96vw); margin: 0 auto; }
+#gameArea { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 28px; background: radial-gradient(circle at 70% 18%, rgba(255, 236, 152, 0.14), transparent 12%), linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 56%, var(--sky-bottom) 100%); box-shadow: 0 18px 42px rgba(0, 0, 0, 0.38); border: 1px solid rgba(255, 255, 255, 0.06); }
+#skyGlow { position: absolute; inset: 0; background: radial-gradient(circle at 22% 24%, rgba(255, 255, 255, 0.08), transparent 18%), radial-gradient(circle at 80% 30%, rgba(114, 170, 255, 0.10), transparent 20%); pointer-events: none; }
+#moon { position: absolute; top: 9%; right: 10%; width: 8.5%; aspect-ratio: 1 / 1; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff7d9, #efe0a5 70%, #ddcd92); box-shadow: 0 0 24px rgba(255, 235, 160, 0.35), 0 0 50px rgba(255, 235, 160, 0.18); z-index: 1; }
+#fireflyLayer, #sparkleLayer, #floatingScoreLayer { position: absolute; inset: 0; pointer-events: none; }
+.firefly { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 245, 150, 0.95); box-shadow: 0 0 10px rgba(255, 230, 90, 0.9); animation: fireflyFloat linear infinite, fireflyBlink ease-in-out infinite alternate; opacity: 0.75; }
+@keyframes fireflyFloat { from { transform: translateY(0px) translateX(0px); } 50% { transform: translateY(-12px) translateX(8px); } to { transform: translateY(6px) translateX(-6px); } }
+@keyframes fireflyBlink { from { opacity: 0.25; } to { opacity: 1; } }
+.spark { position: absolute; font-size: 18px; animation: sparkleRise 700ms ease-out forwards; filter: drop-shadow(0 0 10px rgba(255, 225, 120, 0.7)); }
+@keyframes sparkleRise { 0% { transform: translateY(0) scale(0.7); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-34px) scale(1.2); opacity: 0; } }
+.floatScore { position: absolute; font-weight: bold; font-size: 24px; animation: floatScoreUp 850ms ease-out forwards; text-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+.floatScore.good { color: #ffe78a; }
+.floatScore.bad { color: #ff8585; }
+.floatScore.heart { color: #ffb4c2; }
+@keyframes floatScoreUp { 0% { transform: translateY(0px) scale(0.85); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-38px) scale(1.1); opacity: 0; } }
+.tree { position: absolute; bottom: 12%; width: 8%; height: 34%; z-index: 2; }
+.tree::before { content: ""; position: absolute; bottom: 0; left: 40%; width: 18%; height: 38%; background: #4c2d1e; border-radius: 5px; }
+.tree::after { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 65%; background: radial-gradient(circle at 50% 32%, #25553a, #153723 72%); border-radius: 50% 50% 45% 45%; box-shadow: inset 0 -8px 10px rgba(0,0,0,0.18); }
+.tree1 { left: 4%; } .tree2 { left: 15%; bottom: 11%; transform: scale(1.05); } .tree3 { right: 14%; bottom: 12%; } .tree4 { right: 4%; bottom: 11%; transform: scale(1.08); }
+#ground { position: absolute; left: 0; bottom: 0; width: 100%; height: 15%; background: linear-gradient(180deg, var(--grass-2), var(--grass)); box-shadow: inset 0 8px 12px rgba(255,255,255,0.05); z-index: 2; }
+#hudTop { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 10px; z-index: 30; }
+.hudCard { min-width: 108px; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 18px; padding: 10px 14px; box-shadow: var(--ui-shadow); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+.hudCard.wide { min-width: 160px; }
+.hudLabel, .miniLabel { display: block; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }
+.hudValue { font-size: clamp(20px, 2vw, 28px); font-weight: bold; margin-top: 4px; }
+#hudBottom { position: absolute; left: 18px; right: 18px; bottom: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 30; gap: 14px; }
+.hudBottomLeft, .hudBottomRight { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; padding: 8px 12px; box-shadow: var(--ui-shadow); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); font-size: 14px; }
+.divider { opacity: 0.5; padding: 0 5px; }
+#bear { position: absolute; left: 290px; bottom: 3%; width: 118px; height: 150px; transform-origin: center bottom; transform: scale(var(--bearScale)); pointer-events: none; user-select: none; z-index: 20; }
+#bearSprite { position: absolute; left: -10px; bottom: -18px; width: 155px; height: auto; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22)); }
+#bearSprite.spriteFallback { min-height: 54px; outline: 2px dashed rgba(255, 216, 106, 0.9); background: rgba(255, 216, 106, 0.12); }
+#bear.foxMode #bearSprite, #bear.foxMode.builtInPowerArt #bearSprite { left: -10px; bottom: -12px; width: 155px; }
+#bear.running { animation: bounce 0.20s infinite alternate ease-in-out; }
+@keyframes bounce { from { transform: translateY(0px) scale(var(--bearScale)); } to { transform: translateY(-7px) scale(var(--bearScale)); } }
+#bear.powered #bearSprite, #bear.magnetOn #bearSprite { filter: drop-shadow(0 0 10px rgba(255, 214, 91, 0.85)) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22)); }
+#bear.heroPulse { animation: heroPulse 650ms ease-out; }
+@keyframes heroPulse { 0% { transform: scale(calc(var(--bearScale) * 0.92)); } 45% { transform: scale(calc(var(--bearScale) * 1.14)); } 100% { transform: scale(var(--bearScale)); } }
+#bear.capeOn::before { content: ""; position: absolute; width: 56px; height: 68px; left: 50%; top: 58px; transform: translateX(-50%); background: linear-gradient(#cb2330, #8a1319); border-radius: 0 0 34px 34px; z-index: -1; transform-origin: top center; animation: capeFlap 0.35s infinite alternate ease-in-out; }
+@keyframes capeFlap { from { transform: translateX(-50%) rotate(8deg); } to { transform: translateX(-50%) rotate(-8deg); } }
+#bear.crownOn::after { content: "\uD83D\uDC51"; position: absolute; top: -62px; left: 50%; transform: translateX(-50%); font-size: 28px; z-index: 50; pointer-events: none; animation: crownFloat 1.2s ease-in-out infinite alternate; }
+@keyframes crownFloat { from { transform: translateX(-50%) translateY(0px); } to { transform: translateX(-50%) translateY(-4px); } }
+#bear.speedOn #bearSprite { filter: drop-shadow(0 0 10px rgba(127, 228, 255, 0.95)) drop-shadow(0 0 24px rgba(127, 228, 255, 0.42)) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.22)); }
+#bear.builtInPowerArt.capeOn::before, #bear.builtInPowerArt.crownOn::after, #bear.foxMode.capeOn::before, #bear.foxMode.crownOn::after { display: none !important; }
+.star, .badStar, .bonusStar, .heartStar { position: absolute; font-size: 38px; user-select: none; z-index: 12; filter: drop-shadow(0 0 10px rgba(255,255,255,0.16)); }
+.star { animation: starTwinkle 1.4s ease-in-out infinite alternate; }
+.learningStar { filter: drop-shadow(0 0 10px rgba(255, 218, 70, 0.8)); }
+.badStar { filter: drop-shadow(0 0 12px rgba(255, 65, 65, 0.8)); }
+.bonusStar { filter: drop-shadow(0 0 12px rgba(190, 100, 255, 0.8)); }
+.heartStar { filter: drop-shadow(0 0 12px rgba(255, 95, 135, 0.9)); }
+@keyframes starTwinkle { from { transform: scale(0.95) rotate(-3deg); } to { transform: scale(1.06) rotate(3deg); } }
+.overlayBox { position: absolute; top: 6%; left: 50%; transform: translateX(-50%); width: min(560px, 86%); background: linear-gradient(180deg, rgba(23, 45, 98, 0.95), rgba(13, 28, 68, 0.96)); border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; padding: 24px; z-index: 60; box-shadow: 0 20px 46px rgba(0, 0, 0, 0.42); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.overlayBox h2 { margin-top: 0; font-size: clamp(24px, 2.5vw, 34px); }
+.smallOverlay { width: min(420px, 80%); }
+.introText { max-width: 460px; margin: 0 auto 16px; line-height: 1.5; opacity: 0.95; }
+.titleGlow { font-size: 28px; margin-bottom: 4px; animation: titleBlink 1.5s ease-in-out infinite alternate; }
+@keyframes titleBlink { from { transform: scale(0.95); opacity: 0.7; } to { transform: scale(1.08); opacity: 1; } }
+#playerSetup { margin: 14px 0; }
+#playerName { font-size: 16px; padding: 10px 12px; border-radius: 10px; border: none; margin-left: 8px; width: min(240px, 70%); }
+#scoreBoard { margin: 14px 0; opacity: 0.96; }
+.buttonRow { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+#startButton, .answerBtn, #pauseButton, #nextLevelButton, #restartButton, #fullscreenButton, #storyButton, #languageToggle { font-size: 18px; padding: 12px 18px; border: none; border-radius: 14px; cursor: pointer; margin-top: 6px; font-weight: bold; background: linear-gradient(180deg, #ffe18e, #f0ba3b); color: #1e1b0f; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.22); }
+.answerBtn { min-width: 110px; }
+#pauseButton { background: linear-gradient(180deg, #d4e7ff, #8ebeff); color: #102244; }
+#fullscreenButton { background: linear-gradient(180deg, #c8ffd2, #65d27a); color: #102314; }
+#languageToggle { background: linear-gradient(180deg, #d4e7ff, #8ebeff); color: #102244; white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
+#answerButtons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.smallTip { margin-top: 14px; font-size: 13px; opacity: 0.8; }
+.draftNotice { margin: 12px 0 0; padding: 10px 12px; border: 2px solid #ffd86a; border-radius: 12px; background: rgba(255, 216, 106, 0.14); color: #ffe78a; font-size: 13px; font-weight: bold; line-height: 1.4; overflow-wrap: anywhere; }
+#controlBar { margin-top: 12px; display: flex; justify-content: space-between; gap: 14px; align-items: center; flex-wrap: wrap; }
+#growthMeterWrap { flex: 1; min-width: 240px; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 18px; padding: 12px 14px; box-shadow: var(--ui-shadow); }
+#growthMeter { width: 100%; height: 14px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, 0.12); margin: 6px 0 4px; }
+#growthFill { width: 0%; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffe189, #ffc43d, #ff9f1c); box-shadow: 0 0 14px rgba(255, 199, 69, 0.45); transition: width 220ms ease; }
+#growthText { font-size: 14px; }
+.hidden { display: none !important; }
+#flashOverlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0)); opacity: 0; pointer-events: none; z-index: 55; }
+#flashOverlay.flash { animation: flashPulse 600ms ease-out; }
+@keyframes flashPulse { 0% { opacity: 0; } 18% { opacity: 1; } 100% { opacity: 0; } }
+.shake { animation: screenShake 240ms linear; }
+@keyframes screenShake { 0% { transform: translateX(0px); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(4px); } 100% { transform: translateX(0px); } }
+@media (max-width: 900px) { .star, .badStar, .bonusStar, .heartStar { font-size: 30px; } #hudBottom { bottom: 12px; } .hudBottomLeft, .hudBottomRight { font-size: 12px; } }
+@media (max-width: 640px) { body { padding: 6px; } #hudTop { gap: 6px; } .hudCard { min-width: 72px; padding: 8px 10px; border-radius: 14px; } .hudCard.wide { min-width: 112px; } .hudLabel { font-size: 10px; } .hudValue { font-size: 16px; } #hudBottom { left: 10px; right: 10px; gap: 8px; flex-direction: column; align-items: stretch; } #bear { width: 96px; height: 124px; } #bearSprite, #bear.foxMode #bearSprite, #bear.foxMode.builtInPowerArt #bearSprite { width: 138px; left: -12px; bottom: -10px; } .overlayBox { width: min(92%, 430px); padding: 18px; } #startButton, .answerBtn, #pauseButton, #nextLevelButton, #restartButton, #fullscreenButton, #storyButton, #languageToggle { font-size: 16px; padding: 10px 14px; } #playerName { width: 100%; margin-left: 0; margin-top: 8px; } #controlBar { justify-content: center; } }
+#gameShell { max-width: 100%; }
+.overlayBox { max-height: 88%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
+.titleGlow { width: fit-content; margin-left: auto; margin-right: auto; }
+.overlayBox > * { min-width: 0; max-width: 100%; }
+@media (max-width: 1100px), (max-height: 600px), (pointer: coarse) { body { padding: 8px; padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); height: 100vh; height: 100svh; height: 100dvh; min-height: 280px; display: flex; flex-direction: column; } body > h1 { flex: 0 0 auto; } h1 { font-size: 20px; margin: 0 0 6px; line-height: 1.2; } #gameShell { width: 100%; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; } #gameArea { width: 100%; aspect-ratio: auto; height: auto; flex: 1 1 0; min-height: 0; border-radius: 14px; } #hudTop { top: 6px; left: 6px; right: 6px; gap: 4px; } .hudCard, .hudCard.wide { min-width: 0; flex: 1; padding: 4px; border-radius: 10px; } .hudLabel { font-size: 10px; } .hudValue { font-size: 16px; margin-top: 2px; } #hudBottom { left: 6px; right: 6px; bottom: 4px; flex-direction: row; align-items: center; gap: 6px; pointer-events: none; } .hudBottomLeft, .hudBottomRight { padding: 3px 6px; font-size: 11px; max-width: 48%; overflow-wrap: anywhere; } #hudBottom .miniLabel { display: inline; font-size: 9px; } #bear { left: calc(50% - 48px); bottom: 7%; width: 96px; height: 110px; } #bearSprite, #bear.foxMode #bearSprite, #bear.foxMode.builtInPowerArt #bearSprite { width: 120px; left: -10px; bottom: -10px; } .overlayBox { top: 4%; max-height: 92%; width: min(560px, 94%); padding: 12px; } .overlayBox h2 { font-size: 22px; margin: 0 0 8px; } .introText { margin-bottom: 8px; line-height: 1.3; } #playerSetup, #scoreBoard { margin: 8px 0; } #scoreBoard p { display: inline-block; margin: 0 8px 4px; } .titleGlow { font-size: 20px; } .smallTip { margin: 8px 0 0; } .draftNotice { margin: 8px 0 0; font-size: 12px; } #controlBar { margin-top: 6px; gap: 8px; flex-wrap: nowrap; flex: 0 0 auto; padding-bottom: 4px; } #growthMeterWrap { min-width: 0; padding: 5px 8px; border-radius: 10px; } #growthMeter { height: 8px; margin: 3px 0; } #growthText { font-size: 12px; } #pauseButton { margin: 0; min-height: 44px; } #startButton, .answerBtn, #nextLevelButton, #restartButton, #fullscreenButton, #storyButton, #languageToggle { min-height: 44px; padding: 8px 12px; font-size: 16px; } #playerName { font-size: 16px; } }
+@media (max-height: 500px) and (orientation: landscape) { h1 { font-size: 16px; } #startScreen { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 12px; align-items: center; } #startScreen .titleGlow { display: none; } #startScreen h2 { grid-column: 1 / -1; font-size: 20px; margin: 0; } #startScreen .introText { font-size: 13px; margin: 0; } #playerSetup { margin: 0; font-size: 13px; } #playerName { width: 100%; margin: 3px 0 0; padding: 6px; } #scoreBoard { font-size: 12px; margin: 0; } #startScreen .smallTip { grid-column: 1 / -1; font-size: 11px; margin: 0; } #startScreen .draftNotice { grid-column: 1 / -1; font-size: 11px; margin: 0; } #startScreen .buttonRow { gap: 4px; flex-wrap: wrap; } #startScreen button { font-size: 14px; padding: 6px 8px; margin: 0; } #controlBar .miniLabel { font-size: 10px; } }
+@media (max-height: 500px) and (orientation: landscape) { body { padding-top: max(4px, env(safe-area-inset-top)); padding-bottom: max(4px, env(safe-area-inset-bottom)); } body > h1 { display: none; } #hudTop { top: 4px; } .hudCard, .hudCard.wide { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 3px 4px; } .hudValue { margin-top: 0; line-height: 1.2; } #controlBar { margin-top: 4px; padding-bottom: 0; } #pauseButton { min-width: 80px; min-height: 44px; padding: 8px 14px; } #growthMeterWrap { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 5px 8px; } #controlBar .miniLabel, #growthText { flex: 0 0 auto; white-space: nowrap; } #growthMeter { flex: 1 1 0; min-width: 0; margin: 0; } }
+html { background-color: #081633; min-height: 100%; }
+body { background-color: #081633; }
+@media (max-width: 1100px), (max-height: 600px), (pointer: coarse) { body { height: var(--visible-height, 100dvh); min-height: 0; } #gameArea { --play-safe-left: 0px; --play-safe-right: 0px; } }
+@media (orientation: landscape) and (max-height: 600px) { body { padding: max(4px, env(safe-area-inset-top)) 0 max(4px, env(safe-area-inset-bottom)); } body > h1 { display: none; } #gameArea { --play-safe-left: env(safe-area-inset-left, 0px); --play-safe-right: env(safe-area-inset-right, 0px); border-radius: 0; border: 0; } #hudTop { left: max(6px, var(--play-safe-left)); right: max(6px, var(--play-safe-right)); top: 4px; } .hudCard, .hudCard.wide { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 4px; } .hudValue { margin-top: 0; line-height: 1.2; } #hudBottom { left: max(6px, var(--play-safe-left)); right: max(6px, var(--play-safe-right)); } #bear { width: var(--fit-bear-width, 96px); height: var(--fit-bear-height, 110px); } #bearSprite, #bear.foxMode #bearSprite, #bear.foxMode.builtInPowerArt #bearSprite { width: var(--fit-sprite-width, 120px); left: var(--fit-sprite-offset, -10px); bottom: var(--fit-sprite-offset, -10px); } .star, .badStar, .bonusStar, .heartStar { font-size: var(--fit-star-size, 30px); } #controlBar { padding-left: max(6px, env(safe-area-inset-left)); padding-right: max(6px, env(safe-area-inset-right)); } .overlayBox { max-height: 92%; } }
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 600px) { #gameShell { display: grid; grid-template-columns: minmax(0, 1fr) calc(104px + env(safe-area-inset-right, 0px)); grid-template-rows: minmax(0, 1fr); gap: 0; } #gameArea { height: 100%; --play-safe-right: 0px; } #controlBar { margin: 0; min-width: 0; min-height: 0; padding: 6px max(6px, env(safe-area-inset-right)) 6px 6px; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 10px; } #pauseButton { width: 100%; min-width: 0; min-height: 44px; padding: 8px 6px; font-size: 16px; } #growthMeterWrap { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 10px 5px; } #controlBar .miniLabel { white-space: normal; font-size: 10px; } #growthMeter { flex: 0 0 8px; width: 100%; margin: 0; } #growthText { font-size: 12px; } #startScreen { width: min(560px, calc(100% - var(--play-safe-left) - 16px)); } .overlayBox { left: calc(50% + var(--play-safe-left) / 2); width: min(560px, calc(100% - var(--play-safe-left) - 16px)); } }
+.heroPellet { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fffbd1 0 18%, #ffe46a 22%, #ffc126 55%, #ff8a00 100%); border: 2px solid rgba(255,255,255,0.88); box-shadow: 0 0 10px rgba(255, 221, 70, 0.95), 0 0 24px rgba(255, 169, 0, 0.72); z-index: 13; animation: heroPelletPulse 0.65s ease-in-out infinite alternate; }
+@keyframes heroPelletPulse { from { transform: scale(0.90); filter: brightness(1); } to { transform: scale(1.12); filter: brightness(1.25); } }
+@media (max-width: 1100px), (max-height: 600px), (pointer: coarse) { body.gameplayMode { padding: 0 !important; margin: 0; overflow: hidden; height: var(--visible-height, 100dvh); min-height: 0; background: #081633; } body.gameplayMode > h1 { display: none !important; } body.gameplayMode #gameShell { position: fixed; inset: 0; width: 100vw; max-width: none; height: var(--visible-height, 100dvh); margin: 0; background: #081633; } body.gameplayMode #gameArea { border-radius: 0; border: 0; } }
+#bear.crownOn::after { content: "👑"; }
+</style>
+</head>
+<body>
+  <h1 id="pageTitle">Bramble the Bear: Star Catcher Deluxe</h1>
+  <div id="gameShell">
+    <div id="gameArea">
+      <div id="skyGlow"></div>
+      <div id="moon"></div>
+      <div id="fireflyLayer"></div>
+      <div id="sparkleLayer"></div>
+      <div class="tree tree1"></div>
+      <div class="tree tree2"></div>
+      <div class="tree tree3"></div>
+      <div class="tree tree4"></div>
+      <div id="ground"></div>
+      <div id="hudTop">
+        <div class="hudCard"><div class="hudLabel" id="hudLevelLabel">Level</div><div class="hudValue" id="levelText">1</div></div>
+        <div class="hudCard"><div class="hudLabel" id="hudScoreLabel">Score</div><div class="hudValue" id="score">0</div></div>
+        <div class="hudCard"><div class="hudLabel" id="hudGoalLabel">Goal</div><div class="hudValue" id="goalText">12</div></div>
+        <div class="hudCard wide"><div class="hudLabel" id="hudLivesLabel">Lives</div><div class="hudValue" id="livesText">❤️❤️❤️</div></div>
+      </div>
+      <div id="hudBottom">
+        <div class="hudBottomLeft"><span class="miniLabel" id="hudPlayerLabel">Player:</span> <span id="currentPlayer">Guest</span></div>
+        <div class="hudBottomRight"><span class="miniLabel" id="hudBestLabel">Best:</span> <span id="bestPlayer">None yet</span><span class="divider">•</span><span id="hudHighScore">0</span></div>
+      </div>
+      <div id="bear"><img id="bearSprite" src="bramble_idle_1.png" alt="Character" /></div>
+      <div id="floatingScoreLayer"></div>
+      <div id="startScreen" class="overlayBox">
+        <div class="titleGlow">✨</div>
+        <h2 id="startTitle">Welcome to Bramble’s Forest</h2>
+        <p class="introText" id="startIntro">Catch stars, answer questions, grow stronger, and unlock heroic forest forms.</p>
+        <div id="playerSetup"><label for="playerName" id="playerNameLabel">Player Name:</label><input type="text" id="playerName" maxlength="16" placeholder="Enter name" /></div>
+        <div id="scoreBoard"><p><span id="bestPlayerLabel">Best Player:</span> <span id="bestPlayerStart">None yet</span></p><p><span id="highScoreLabel">High Score:</span> <span id="highScore">0</span></p></div>
+        <div class="buttonRow"><button id="startButton">Start Adventure</button><button id="fullscreenButton">Fullscreen</button><button id="languageToggle">English | Español</button></div>
+        <p class="draftNotice" id="draftNotice">DRAFT — Spanish translation not yet checked<br>BORRADOR — traducción al español aún no revisada</p>
+        <p class="smallTip" id="startTip">Mouse or touch to move • Catch stars • Answer learning stars correctly to grow</p>
+      </div>
+      <div id="questionBox" class="hidden overlayBox"><h2 id="questionTitle">Learning Moment</h2><p id="questionText">Question</p><div id="answerButtons"><button class="answerBtn" id="answer0"></button><button class="answerBtn" id="answer1"></button><button class="answerBtn" id="answer2"></button></div></div>
+      <div id="storyBox" class="hidden overlayBox"><h2 id="storyTitle">Forest Story</h2><p id="storyMessage"></p><button id="storyButton">Continue</button></div>
+      <div id="levelBox" class="hidden overlayBox"><h2 id="levelTitle">Level Complete</h2><p id="levelMessage"></p><button id="nextLevelButton">Next Level</button></div>
+      <div id="gameOverBox" class="hidden overlayBox"><h2 id="gameOverTitle">Game Over</h2><p id="gameOverMessage"></p><button id="restartButton">Play Again</button></div>
+      <div id="pauseOverlay" class="hidden overlayBox smallOverlay"><h2 id="pauseTitle">Paused</h2><p id="pauseText">Tap Resume to continue the adventure.</p></div>
+      <div id="flashOverlay"></div>
+    </div>
+    <div id="controlBar"><button id="pauseButton">Pause</button><div id="growthMeterWrap"><span class="miniLabel" id="growthLabel">Learning Power</span><div id="growthMeter"><div id="growthFill"></div></div><span id="growthText">0 / 4</span></div></div>
+  </div>
+  <div id="hiddenGameData" class="hidden"><span id="sizeText">1.00x</span></div>
+<script>
+const gameArea = document.getElementById("gameArea");
+const bear = document.getElementById("bear");
+const bearSprite = document.getElementById("bearSprite");
+if (bearSprite) { const updateSpriteFallback = () => { bearSprite.classList.toggle("spriteFallback", !bearSprite.naturalWidth); }; bearSprite.addEventListener("load", updateSpriteFallback); bearSprite.addEventListener("error", updateSpriteFallback); if (bearSprite.complete) updateSpriteFallback(); }
+const scoreDisplay = document.getElementById("score");
+const sizeText = document.getElementById("sizeText");
+const levelText = document.getElementById("levelText");
+const goalText = document.getElementById("goalText");
+const livesText = document.getElementById("livesText");
+const currentPlayerText = document.getElementById("currentPlayer");
+const bestPlayerText = document.getElementById("bestPlayer");
+const bestPlayerStartText = document.getElementById("bestPlayerStart");
+const highScoreText = document.getElementById("highScore");
+const hudHighScoreText = document.getElementById("hudHighScore");
+const startButton = document.getElementById("startButton");
+const fullscreenButton = document.getElementById("fullscreenButton");
+const pauseButton = document.getElementById("pauseButton");
+const nextLevelButton = document.getElementById("nextLevelButton");
+const restartButton = document.getElementById("restartButton");
+const storyButton = document.getElementById("storyButton");
+const languageToggle = document.getElementById("languageToggle");
+const startScreen = document.getElementById("startScreen");
+const questionBox = document.getElementById("questionBox");
+const levelBox = document.getElementById("levelBox");
+const gameOverBox = document.getElementById("gameOverBox");
+const pauseOverlay = document.getElementById("pauseOverlay");
+const storyBox = document.getElementById("storyBox");
+const questionText = document.getElementById("questionText");
+const levelTitle = document.getElementById("levelTitle");
+const levelMessage = document.getElementById("levelMessage");
+const gameOverMessage = document.getElementById("gameOverMessage");
+const storyTitle = document.getElementById("storyTitle");
+const storyMessage = document.getElementById("storyMessage");
+const growthFill = document.getElementById("growthFill");
+const growthText = document.getElementById("growthText");
+const fireflyLayer = document.getElementById("fireflyLayer");
+const sparkleLayer = document.getElementById("sparkleLayer");
+const floatingScoreLayer = document.getElementById("floatingScoreLayer");
+const flashOverlay = document.getElementById("flashOverlay");
+const playerNameInput = document.getElementById("playerName");
+const answerButtons = [document.getElementById("answer0"), document.getElementById("answer1"), document.getElementById("answer2")];
+const STORAGE_KEYS = { bestPlayer: "bramble_best_player", highScore: "bramble_high_score", playerName: "bramble_player_name", language: "bramble_language" };
+const I18N_ES = {
+"Bramble the Bear: Star Catcher Deluxe": "Bramble el Oso: Atrapador de Estrellas Deluxe",
+"Character": "Personaje",
+"Welcome to Bramble’s Forest": "Bienvenido al bosque de Bramble",
+"Catch stars, answer questions, grow stronger, and unlock heroic forest forms.": "Atrapa estrellas, responde preguntas, hazte más fuerte y desbloquea formas heroicas del bosque.",
+"Player Name:": "Nombre del jugador:",
+"Enter name": "Escribe tu nombre",
+"Best Player:": "Mejor jugador:",
+"High Score:": "Puntuación más alta:",
+"Start Adventure": "Comenzar la aventura",
+"Fullscreen": "Pantalla completa",
+"Exit Fullscreen": "Salir de pantalla completa",
+"Mouse or touch to move • Catch stars • Answer learning stars correctly to grow": "Usa el mouse o el tacto para moverte • Atrapa estrellas • Responde bien las estrellas de aprendizaje para crecer",
+"Level": "Nivel", "Score": "Puntuación", "Goal": "Meta", "Lives": "Vidas", "Player:": "Jugador:", "Best:": "Mejor:", "Guest": "Invitado", "None yet": "Todavía no", "Learning Power": "Poder de aprendizaje", "Pause": "Pausa", "Resume": "Continuar",
+"Learning Moment": "Momento de aprendizaje", "Question": "Pregunta",
+"Forest Story": "Historia del bosque", "Continue": "Continuar",
+"A New Friend Appears": "Un nuevo amigo aparece",
+"Bramble reaches deeper into the forest and meets a clever fox. The adventure changes, and the forest feels faster now.": "Bramble se adentra más en el bosque y conoce a un zorro astuto. La aventura cambia y el bosque se siente más rápido ahora.",
+"Return of the Bear Hero": "El regreso del oso héroe",
+"Bramble returns stronger than before, carrying everything learned in the glowing woods.": "Bramble regresa más fuerte que antes, llevando todo lo aprendido en el bosque brillante.",
+"Level Complete": "Nivel completado", "Level Complete!": "¡Nivel completado!", "Next Level": "Siguiente nivel", "Game Over": "Fin del juego", "Play Again": "Jugar de nuevo", "Paused": "En pausa", "Tap Resume to continue the adventure.": "Toca Continuar para seguir con la aventura.",
+"HERO!": "¡HÉROE!", "Try Again!": "¡Inténtalo de nuevo!", "-1 life": "-1 vida", "+1 life": "+1 vida", "Hero pellet": "Píldora de héroe"
+};
+let currentLanguage = "en";
+try { const savedLang = localStorage.getItem(STORAGE_KEYS.language); if (savedLang === "es" || savedLang === "en") currentLanguage = savedLang; } catch (e) {}
+function t(enText) { return currentLanguage === "es" ? (I18N_ES[enText] || enText) : enText; }
+function displayName(name) { if (name === "Guest" || name === "None yet") return t(name); return name; }
+function setText(id, enText) { const el = document.getElementById(id); if (el) el.textContent = t(enText); }
+function applyLanguage() {
+  document.title = t("Bramble the Bear: Star Catcher Deluxe");
+  setText("pageTitle", "Bramble the Bear: Star Catcher Deluxe");
+  setText("hudLevelLabel", "Level"); setText("hudScoreLabel", "Score"); setText("hudGoalLabel", "Goal"); setText("hudLivesLabel", "Lives");
+  setText("hudPlayerLabel", "Player:"); setText("hudBestLabel", "Best:"); setText("growthLabel", "Learning Power");
+  setText("startTitle", "Welcome to Bramble’s Forest"); setText("startIntro", "Catch stars, answer questions, grow stronger, and unlock heroic forest forms.");
+  setText("playerNameLabel", "Player Name:"); setText("bestPlayerLabel", "Best Player:"); setText("highScoreLabel", "High Score:");
+  setText("startButton", "Start Adventure"); setText("startTip", "Mouse or touch to move • Catch stars • Answer learning stars correctly to grow");
+  if (playerNameInput) playerNameInput.placeholder = t("Enter name");
+  if (bearSprite) bearSprite.alt = t("Character");
+  setText("questionTitle", "Learning Moment");
+  if (questionBox.classList.contains("hidden")) setText("questionText", "Question");
+  setText("storyTitle", "Forest Story"); setText("storyButton", "Continue");
+  if (levelBox.classList.contains("hidden")) setText("levelTitle", "Level Complete");
+  setText("nextLevelButton", "Next Level"); setText("gameOverTitle", "Game Over"); setText("restartButton", "Play Again");
+  setText("pauseTitle", "Paused"); setText("pauseText", "Tap Resume to continue the adventure.");
+  updateFullscreenButton();
+  if (!questionBox.classList.contains("hidden")) { pauseButton.textContent = t("Resume"); }
+  else if (gamePaused) { pauseButton.textContent = t("Resume"); }
+  else { pauseButton.textContent = t("Pause"); }
+  if (!storyBox.classList.contains("hidden")) { const s = getStoryForLevel(currentLevel); if (s) { storyTitle.textContent = s.title; storyMessage.textContent = s.text; } }
+  if (!levelBox.classList.contains("hidden")) { levelTitle.textContent = t("Level Complete!"); levelMessage.textContent = currentLanguage === "es" ? displayName(currentPlayerName) + " alcanzó la meta de " + levelGoal + " puntos." : displayName(currentPlayerName) + " reached the goal of " + levelGoal + " points."; }
+  if (!gameOverBox.classList.contains("hidden")) { gameOverMessage.textContent = currentLanguage === "es" ? displayName(currentPlayerName) + " llegó al nivel " + currentLevel + "! Puntuación final: " + score + ". Mejor puntuación: " + highScore + "." : displayName(currentPlayerName) + " reached Level " + currentLevel + "! Final Score: " + score + ". Best Score: " + highScore + "."; }
+  updateHud();
+}
+if (languageToggle) { languageToggle.addEventListener("click", () => { currentLanguage = currentLanguage === "es" ? "en" : "es"; try { localStorage.setItem(STORAGE_KEYS.language, currentLanguage); } catch (e) {} applyLanguage(); }); }
+let currentLevel = 1; let score = 0; let lives = 3; let currentPlayerName = "Guest"; let bestPlayerName = "None yet"; let highScore = 0; let levelGoal = 12; let gameRunning = false; let gamePaused = false; let isPlaying = false; let bearX = 0; let bearSpeed = 0; let bearScale = 1; let correctAnswerCount = 0; let spawnInterval = null; let spawnCount = 0; let items = []; let animationFrame = null; let currentQuestion = null; let questionActive = false; let storyPending = false; let nextLevelPending = false; let isHero = false; let isMagnet = false; let isSpeed = false; let powerTimer = null;
+const levelGoals = [12, 18, 28, 40, 54, 70, 88, 108, 130];
+function getLevelGoal(level) { if (level <= levelGoals.length) return levelGoals[level - 1]; return levelGoals[levelGoals.length - 1] + (level - levelGoals.length) * 22; }
+const ANSWERS_TO_HERO = 4;
+const GROWTH_STEPS = [1.00, 1.15, 1.30, 1.45];
+const HERO_FORM_SCALE = 1.8;
+function isFoxLevel() { return currentLevel >= 3 && currentLevel <= 5; }
+const questionSets = {
+  easy: [
+    { q: "3 + 2 =?", answers: ["4", "5", "6"], correct: 1 },
+    { q: "5 - 1 =?", answers: ["3", "4", "6"], correct: 1 },
+    { q: "Find the word: the", answers: ["was", "the", "and"], correct: 1 },
+    { q: "Find the word: jump", answers: ["jump", "play", "look"], correct: 0 },
+    { q: "2 + 4 =?", answers: ["5", "6", "7"], correct: 1 },
+    { q: "Find the word: can", answers: ["can", "big", "red"], correct: 0 }
+  ],
+  medium: [
+    { q: "7 + 5 =?", answers: ["11", "12", "13"], correct: 1 },
+    { q: "9 - 3 =?", answers: ["5", "6", "7"], correct: 1 },
+    { q: "What color is grass?", answers: ["green", "blue", "purple"], correct: 0 },
+    { q: "What color is the sky?", answers: ["yellow", "blue", "black"], correct: 1 },
+    { q: "Which word names a color?", answers: ["orange", "table", "run"], correct: 0 },
+    { q: "What shape has 3 sides?", answers: ["circle", "triangle", "square"], correct: 1 }
+  ],
+  hard: [
+    { q: "12 + 8 =?", answers: ["18", "20", "22"], correct: 1 },
+    { q: "15 - 6 =?", answers: ["7", "8", "9"], correct: 2 },
+    { q: "Fill in the blank: The cat sat on the ___.", answers: ["mat", "tree", "sun"], correct: 0 },
+    { q: "Fill in the blank: I can throw the ___.", answers: ["ball", "blue", "chair"], correct: 0 },
+    { q: "Fill in the blank: We sleep at ___.", answers: ["night", "jump", "green"], correct: 0 },
+    { q: "Which word completes the sentence: The bird can ___.", answers: ["fly", "apple", "book"], correct: 0 }
+  ]
+};
+const questionSetsEs = {
+  easy: [
+    { q: "3 + 2 =?", answers: ["4", "5", "6"], correct: 1 },
+    { q: "5 - 1 =?", answers: ["3", "4", "6"], correct: 1 },
+    { q: "Encuentra la palabra: el", answers: ["era", "el", "y"], correct: 1 },
+    { q: "Encuentra la palabra: salta", answers: ["salta", "juega", "mira"], correct: 0 },
+    { q: "2 + 4 =?", answers: ["5", "6", "7"], correct: 1 },
+    { q: "Encuentra la palabra: puede", answers: ["puede", "grande", "rojo"], correct: 0 }
+  ],
+  medium: [
+    { q: "7 + 5 =?", answers: ["11", "12", "13"], correct: 1 },
+    { q: "9 - 3 =?", answers: ["5", "6", "7"], correct: 1 },
+    { q: "¿De qué color es el pasto?", answers: ["verde", "azul", "morado"], correct: 0 },
+    { q: "¿De qué color es el cielo?", answers: ["amarillo", "azul", "negro"], correct: 1 },
+    { q: "¿Qué palabra nombra un color?", answers: ["naranja", "mesa", "corre"], correct: 0 },
+    { q: "¿Qué forma tiene 3 lados?", answers: ["círculo", "triángulo", "cuadrado"], correct: 1 }
+  ],
+  hard: [
+    { q: "12 + 8 =?", answers: ["18", "20", "22"], correct: 1 },
+    { q: "15 - 6 =?", answers: ["7", "8", "9"], correct: 2 },
+    { q: "Completa: El gato se sentó en el ___.", answers: ["tapete", "árbol", "sol"], correct: 0 },
+    { q: "Completa: Puedo lanzar el ___.", answers: ["pelota", "azul", "silla"], correct: 0 },
+    { q: "Completa: Dormimos de ___.", answers: ["noche", "salta", "verde"], correct: 0 },
+    { q: "¿Qué palabra completa la oración? El pájaro puede ___.", answers: ["volar", "manzana", "libro"], correct: 0 }
+  ]
+};
+function getQuestionSets() { return currentLanguage === "es" ? questionSetsEs : questionSets; }
+function getQuestionPoolForLevel(level) { const sets = getQuestionSets(); if (level <= 2) return sets.easy; if (level <= 4) return sets.easy.concat(sets.medium); return sets.medium.concat(sets.hard); }
+function getStoryForLevel(level) {
+  if (level === 3) return currentLanguage === "es" ? { title: "Un nuevo amigo aparece", text: "Bramble se adentra más en el bosque y conoce a un zorro astuto. La aventura cambia y el bosque se siente más rápido ahora." } : { title: "A New Friend Appears", text: "Bramble reaches deeper into the forest and meets a clever fox. The adventure changes, and the forest feels faster now." };
+  if (level === 6) return currentLanguage === "es" ? { title: "El regreso del oso héroe", text: "Bramble regresa más fuerte que antes, llevando todo lo aprendido en el bosque brillante." } : { title: "Return of the Bear Hero", text: "Bramble returns stronger than before, carrying everything learned in the glowing woods." };
+  return null;
+}
+let forestAudio = null; let levelCompleteAudio = null;
+try { forestAudio = new Audio("forest_theme.m4a"); forestAudio.loop = true; } catch (e) {}
+try { levelCompleteAudio = new Audio("level_complete.m4a"); } catch (e) {}
+function playForestMusic() { if (forestAudio) { forestAudio.play().catch(() => {}); } }
+function stopForestMusic() { if (forestAudio) { forestAudio.pause(); forestAudio.currentTime = 0; } }
+function playLevelCompleteSound() { if (levelCompleteAudio) { levelCompleteAudio.currentTime = 0; levelCompleteAudio.play().catch(() => {}); } }
+function loadPlayerData() { try { const savedName = localStorage.getItem(STORAGE_KEYS.playerName); if (savedName) { currentPlayerName = savedName; playerNameInput.value = savedName; } const savedBest = localStorage.getItem(STORAGE_KEYS.bestPlayer); if (savedBest) bestPlayerName = savedBest; const savedScore = localStorage.getItem(STORAGE_KEYS.highScore); if (savedScore !== null) highScore = parseInt(savedScore, 10) || 0; } catch (e) {} }
+function savePlayerData() { try { localStorage.setItem(STORAGE_KEYS.playerName, currentPlayerName); localStorage.setItem(STORAGE_KEYS.bestPlayer, bestPlayerName); localStorage.setItem(STORAGE_KEYS.highScore, String(highScore)); } catch (e) {} }
+function updateHud() {
+  levelText.textContent = currentLevel; scoreDisplay.textContent = score; goalText.textContent = levelGoal;
+  livesText.textContent = "❤️".repeat(Math.max(0, lives));
+  currentPlayerText.textContent = displayName(currentPlayerName);
+  if (bestPlayerName !== "None yet") { bestPlayerText.textContent = displayName(bestPlayerName) + " - " + highScore; } else { bestPlayerText.textContent = t("None yet"); }
+  bestPlayerStartText.textContent = displayName(bestPlayerName);
+  highScoreText.textContent = highScore; hudHighScoreText.textContent = highScore;
+  growthFill.style.width = (correctAnswerCount / ANSWERS_TO_HERO * 100) + "%";
+  growthText.textContent = correctAnswerCount + " / " + ANSWERS_TO_HERO;
+  sizeText.textContent = bearScale.toFixed(2) + "x";
+}
+function updateFullscreenButton() { fullscreenButton.textContent = document.fullscreenElement ? t("Exit Fullscreen") : t("Fullscreen"); }
+function updateBearVisual() {
+  bear.classList.toggle("foxMode", isFoxLevel());
+  bear.classList.toggle("powered", isHero || correctAnswerCount >= ANSWERS_TO_HERO);
+  bear.classList.toggle("magnet", isMagnet);
+  bear.classList.toggle("heroPulse", isHero);
+  bear.classList.toggle("cape", isHero);
+  bear.classList.toggle("crown", correctAnswerCount >= ANSWERS_TO_HERO);
+  bear.classList.toggle("crownOn", correctAnswerCount >= ANSWERS_TO_HERO);
+  bear.classList.toggle("speed", isSpeed);
+  bear.classList.toggle("builtInPowerArt", isHero || correctAnswerCount >= ANSWERS_TO_HERO);
+  let sprite = "bramble_idle_1.png";
+  if (isFoxLevel()) { sprite = isHero || correctAnswerCount >= ANSWERS_TO_HERO ? "fox_power_idle_1.png" : "fox_idle_1.png"; }
+  else { sprite = isHero || correctAnswerCount >= ANSWERS_TO_HERO ? "bramble_power_idle_1.png" : "bramble_idle_1.png"; }
+  if (bearSprite && bearSprite.getAttribute("src") !== sprite) bearSprite.setAttribute("src", sprite);
+  bear.style.transform = "scale(" + bearScale + ")";
+  bear.style.left = bearX + "px";
+}
+function applyGrowth() { const step = Math.min(correctAnswerCount, GROWTH_STEPS.length - 1); bearScale = isHero ? HERO_FORM_SCALE : GROWTH_STEPS[step]; updateBearVisual(); updateHud(); }
+function showFloating(text, cls, x, y) { const el = document.createElement("div"); el.className = "floatScore" + (cls ? " " + cls : ""); el.textContent = text; el.style.left = x + "px"; el.style.top = y + "px"; floatingScoreLayer.appendChild(el); setTimeout(() => el.remove(), 1100); }
+function flashScreen() { flashOverlay.classList.remove("flash"); void flashOverlay.offsetWidth; flashOverlay.classList.add("flash"); }
+function shakeScreen() { gameArea.classList.remove("shake"); void gameArea.offsetWidth; gameArea.classList.add("shake"); }
+function createFireflies() { fireflyLayer.innerHTML = ""; for (let i = 0; i < 14; i++) { const f = document.createElement("div"); f.className = "firefly"; f.style.left = Math.random() * 100 + "%"; f.style.top = Math.random() * 100 + "%"; f.style.animationDelay = (Math.random() * 3) + "s"; fireflyLayer.appendChild(f); } }
+function createSparkles() { sparkleLayer.innerHTML = ""; for (let i = 0; i < 10; i++) { const s = document.createElement("div"); s.className = "spark"; s.style.left = Math.random() * 100 + "%"; s.style.top = Math.random() * 100 + "%"; s.style.animationDelay = (Math.random() * 2) + "s"; sparkleLayer.appendChild(s); } }
+function createItem() {
+  spawnCount++;
+  const areaW = gameArea.clientWidth; const x = Math.random() * Math.max(40, areaW - 60) + 10;
+  let type = "star"; let el = document.createElement("div");
+  if (currentLevel >= 3 && spawnCount % 11 === 0 && lives < 4) type = "heart";
+  else if (spawnCount % 15 === 0) type = "hero";
+  else if (spawnCount % 6 === 0) type = "learning";
+  else if (spawnCount % 7 === 0) type = "bonus";
+  else if (spawnCount % 12 === 0) type = "bad";
+  if (type === "heart") { el.className = "heartStar"; el.textContent = "❤️"; }
+  else if (type === "hero") { el.className = "heroPellet"; el.setAttribute("aria-label", t("Hero pellet")); }
+  else if (type === "learning") { el.className = "star learning"; el.textContent = "⭐"; }
+  else if (type === "bonus") { el.className = "bonusStar"; el.textContent = "⭐"; }
+  else if (type === "bad") { el.className = "badStar"; el.textContent = "⭐"; }
+  else { el.className = "star"; el.textContent = "⭐"; }
+  el.style.left = x + "px"; el.style.top = "-40px"; gameArea.appendChild(el);
+  items.push({ el: el, type: type, x: x, y: -40, dx: type === "learning" ? 0 : (Math.random() * 1.2 - 0.6), speed: type === "learning" ? 3 : 2.2 + Math.random() * 1.2 });
+}
+function moveBearTo(clientX) { const rect = gameArea.getBoundingClientRect(); const rel = clientX - rect.left; bearX = Math.max(0, Math.min(rect.width - bear.offsetWidth, rel - bear.offsetWidth / 2)); bear.style.left = bearX + "px"; }
+gameArea.addEventListener("pointermove", (e) => { if (!gameRunning || gamePaused) return; moveBearTo(e.clientX); bear.classList.add("running"); setTimeout(() => bear.classList.remove("running"), 200); });
+gameArea.addEventListener("pointerdown", (e) => { if (!gameRunning || gamePaused) return; moveBearTo(e.clientX); });
+function collectItem(item) {
+  const rect = bear.getBoundingClientRect(); const areaRect = gameArea.getBoundingClientRect(); const bx = rect.left - areaRect.left + rect.width / 2; const by = rect.top - areaRect.top;
+  if (item.type === "star") { score += 1; showFloating("+1", "good", bx, by); }
+  else if (item.type === "bonus") { score += 2; showFloating("+2", "good", bx, by); }
+  else if (item.type === "bad") { loseLife(bx, by); }
+  else if (item.type === "heart") { awardHeart(bx, by); }
+  else if (item.type === "hero") { activateHeroPellet(bx, by); }
+  else if (item.type === "learning") { score += 1; showFloating("+1", "good", bx, by); showQuestion(); }
+  item.el.remove(); updateHud(); checkLevelComplete();
+}
+function loseLife(bx, by) { lives--; showFloating(t("-1 life"), "bad", bx, by); bearScale = 1; isHero = false; isMagnet = false; isSpeed = false; correctAnswerCount = 0; shakeScreen(); updateBearVisual(); if (lives <= 0) { showGameOver(); } }
+function awardHeart(bx, by) { if (lives < 4) { lives++; showFloating(t("+1 life"), "heart", bx, by); } else { score += 3; showFloating("+3", "good", bx, by); } }
+function activateHeroPellet(bx, by) { if (!isHero) { showFloating(t("HERO!"), "good", bx, by); } else { showFloating("+3", "good", bx, by); } isHero = true; correctAnswerCount = ANSWERS_TO_HERO; flashScreen(); applyGrowth(); }
+function showQuestion() {
+  if (questionActive) return; questionActive = true; gamePaused = true; pauseButton.textContent = t("Resume");
+  const pool = getQuestionPoolForLevel(currentLevel); currentQuestion = pool[Math.floor(Math.random() * pool.length)];
+  document.getElementById("questionTitle").textContent = t("Learning Moment");
+  questionText.textContent = currentQuestion.q;
+  answerButtons.forEach((btn, i) => { btn.textContent = currentQuestion.answers[i]; btn.onclick = () => answerQuestion(i); });
+  questionBox.classList.remove("hidden");
+}
+function answerQuestion(index) {
+  questionBox.classList.add("hidden"); questionActive = false; gamePaused = false; pauseButton.textContent = t("Pause");
+  const rect = bear.getBoundingClientRect(); const areaRect = gameArea.getBoundingClientRect(); const bx = rect.left - areaRect.left + rect.width / 2; const by = rect.top - areaRect.top;
+  if (currentQuestion && index === currentQuestion.correct) { score += 1; if (correctAnswerCount < ANSWERS_TO_HERO) correctAnswerCount++; showFloating("+1", "good", bx, by); applyGrowth(); }
+  else { showFloating(t("Try Again!"), "bad", bx, by); }
+  currentQuestion = null; updateHud(); checkLevelComplete();
+}
+function pauseGame() {
+  if (!gameRunning) return;
+  if (questionActive) { questionBox.classList.add("hidden"); questionActive = false; currentQuestion = null; gamePaused = false; pauseButton.textContent = t("Pause"); return; }
+  if (gamePaused) { gamePaused = false; pauseOverlay.classList.add("hidden"); pauseButton.textContent = t("Pause"); if (isPlaying) playForestMusic(); }
+  else { gamePaused = true; pauseOverlay.classList.remove("hidden"); pauseButton.textContent = t("Resume"); if (forestAudio) forestAudio.pause(); }
+}
+function gameLoop() {
+  if (!gameRunning || gamePaused) { animationFrame = requestAnimationFrame(gameLoop); return; }
+  const areaH = gameArea.clientHeight; const bearRect = bear.getBoundingClientRect(); const areaRect = gameArea.getBoundingClientRect();
+  const bearTop = bearRect.top - areaRect.top; const bearLeft = bearRect.left - areaRect.left; const bearW = bearRect.width; const bearH = bearRect.height;
+  items = items.filter((item) => {
+    item.y += item.speed; item.x += item.dx;
+    if (item.x < 0) { item.x = 0; item.dx = Math.abs(item.dx); } if (item.x > gameArea.clientWidth - 30) { item.x = gameArea.clientWidth - 30; item.dx = -Math.abs(item.dx); }
+    item.el.style.left = item.x + "px"; item.el.style.top = item.y + "px";
+    const itemTop = item.y; const itemBottom = item.y + 30; const itemLeft = item.x; const itemRight = item.x + 30;
+    const hit = itemBottom >= bearTop && itemTop <= bearTop + bearH && itemRight >= bearLeft && itemLeft <= bearLeft + bearW;
+    if (hit) { collectItem(item); return false; }
+    if (item.y > areaH + 40) { item.el.remove(); return false; }
+    return true;
+  });
+  animationFrame = requestAnimationFrame(gameLoop);
+}
+function startSpawning() { stopSpawning(); const rate = Math.max(420, 920 - (currentLevel - 1) * 45); spawnInterval = setInterval(() => { if (!gamePaused && gameRunning && !questionActive) createItem(); }, rate); }
+function stopSpawning() { if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; } }
+function clearItems() { items.forEach((i) => i.el.remove()); items = []; }
+function checkLevelComplete() { if (!gameRunning || gamePaused) return; if (score >= levelGoal) { showLevelComplete(); } }
+function showLevelComplete() {
+  gameRunning = false; stopSpawning(); playLevelCompleteSound(); if (forestAudio) forestAudio.pause();
+  if (score > highScore) { highScore = score; bestPlayerName = currentPlayerName; savePlayerData(); }
+  levelTitle.textContent = t("Level Complete!");
+  levelMessage.textContent = currentLanguage === "es" ? displayName(currentPlayerName) + " alcanzó la meta de " + levelGoal + " puntos." : displayName(currentPlayerName) + " reached the goal of " + levelGoal + " points.";
+  levelBox.classList.remove("hidden"); updateHud();
+}
+function showGameOver() {
+  gameRunning = false; stopSpawning(); if (forestAudio) forestAudio.pause(); stopForestMusic();
+  if (score > highScore) { highScore = score; bestPlayerName = currentPlayerName; savePlayerData(); }
+  document.getElementById("gameOverTitle").textContent = t("Game Over");
+  gameOverMessage.textContent = currentLanguage === "es" ? displayName(currentPlayerName) + " llegó al nivel " + currentLevel + "! Puntuación final: " + score + ". Mejor puntuación: " + highScore + "." : displayName(currentPlayerName) + " reached Level " + currentLevel + "! Final Score: " + score + ". Best Score: " + highScore + ".";
+  gameOverBox.classList.remove("hidden"); updateHud();
+}
+function startFreshGame() {
+  const name = playerNameInput.value.trim(); if (name) currentPlayerName = name;
+  currentLevel = 1; score = 0; lives = 3; correctAnswerCount = 0; isHero = false; isMagnet = false; isSpeed = false; bearScale = 1; levelGoal = getLevelGoal(1); spawnCount = 0; questionActive = false; currentQuestion = null;
+  startScreen.classList.add("hidden"); questionBox.classList.add("hidden"); levelBox.classList.add("hidden"); gameOverBox.classList.add("hidden"); storyBox.classList.add("hidden"); pauseOverlay.classList.add("hidden");
+  clearItems(); document.body.classList.add("gameplayMode"); gameRunning = true; gamePaused = false; isPlaying = true; pauseButton.textContent = t("Pause");
+  bearX = (gameArea.clientWidth - bear.offsetWidth) / 2; updateBearVisual(); updateHud(); startSpawning(); playForestMusic();
+  if (animationFrame) cancelAnimationFrame(animationFrame); animationFrame = requestAnimationFrame(gameLoop);
+}
+function nextLevel() {
+  levelBox.classList.add("hidden"); currentLevel++; levelGoal = getLevelGoal(currentLevel); score = 0; lives = Math.max(lives, 3); correctAnswerCount = 0; isHero = false; isMagnet = false; isSpeed = false; bearScale = 1;
+  const story = getStoryForLevel(currentLevel);
+  if (story) { storyTitle.textContent = story.title; storyMessage.textContent = story.text; storyBox.classList.remove("hidden"); storyPending = true; gameRunning = false; gamePaused = true; }
+  else { gameRunning = true; gamePaused = false; clearItems(); updateBearVisual(); updateHud(); startSpawning(); playForestMusic(); if (animationFrame) cancelAnimationFrame(animationFrame); animationFrame = requestAnimationFrame(gameLoop); }
+  updateHud();
+}
+function continueAfterStory() { storyBox.classList.add("hidden"); storyPending = false; gameRunning = true; gamePaused = false; clearItems(); updateBearVisual(); updateHud(); startSpawning(); playForestMusic(); if (animationFrame) cancelAnimationFrame(animationFrame); animationFrame = requestAnimationFrame(gameLoop); }
+startButton.addEventListener("click", startFreshGame);
+nextLevelButton.addEventListener("click", nextLevel);
+restartButton.addEventListener("click", () => { gameOverBox.classList.add("hidden"); document.body.classList.remove("gameplayMode"); startScreen.classList.remove("hidden"); gameRunning = false; gamePaused = false; isPlaying = false; updateHud(); });
+storyButton.addEventListener("click", continueAfterStory);
+pauseButton.addEventListener("click", pauseGame);
+fullscreenButton.addEventListener("click", async () => { try { if (document.fullscreenElement) { await document.exitFullscreen(); } else { await document.documentElement.requestFullscreen(); } } catch (e) { console.log("Fullscreen unavailable:", e); } updateFullscreenButton(); });
+document.addEventListener("fullscreenchange", updateFullscreenButton);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "k") { score += 10; updateHud(); checkLevelComplete(); }
+  if (e.key === "n") { nextLevel(); }
+  if (e.key === "b") { lives = Math.min(4, lives + 1); updateHud(); }
+  if (e.key === "r") { if (gamePaused) pauseGame(); }
+  if (e.key === "h") { activateHeroPellet(bearX, 100); updateHud(); }
+  if (e.key === "4") { correctAnswerCount = 4; applyGrowth(); }
+  if (e.key === "7") { showQuestion(); }
+  if (e.key === "ArrowLeft") { bearX = Math.max(0, bearX - 20); bear.style.left = bearX + "px"; }
+  if (e.key === "ArrowRight") { bearX = Math.min(gameArea.clientWidth - bear.offsetWidth, bearX + 20); bear.style.left = bearX + "px"; }
+});
+function setVisibleHeight() { const vh = window.innerHeight; document.body.style.setProperty("--visible-height", vh + "px"); }
+window.addEventListener("resize", setVisibleHeight); window.addEventListener("orientationchange", () => setTimeout(setVisibleHeight, 100)); setVisibleHeight();
+function fitGame() { const area = gameArea; if (!area) return; const w = area.clientWidth; const h = area.clientHeight; if (w && h) { const scale = Math.min(w / 900, h / 600); area.style.setProperty("--fit-bear-width", Math.round(96 * scale) + "px"); area.style.setProperty("--fit-bear-height", Math.round(110 * scale) + "px"); area.style.setProperty("--fit-sprite-width", Math.round(120 * scale) + "px"); area.style.setProperty("--fit-star-size", Math.round(30 * scale) + "px"); } }
+window.addEventListener("resize", fitGame); fitGame();
+loadPlayerData(); createFireflies(); createSparkles(); updateBearVisual(); updateHud(); updateFullscreenButton(); applyLanguage();
+</script>
+</body>
+</html>
